@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Dashboard - Movie Time</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Link existing styling -->
+    <link rel="stylesheet" href="style.css?v=2">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 50% 50%, #0d1224 0%, #030409 100%);
+            padding: 2rem 1rem;
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Glowing background blobs */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            filter: blur(150px);
+            z-index: 1;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        body::before {
+            background: var(--accent-cyan);
+            top: 5%;
+            right: 10%;
+        }
+        body::after {
+            background: var(--accent-cyan);
+            bottom: 5%;
+            left: 10%;
+        }
+
+        .manage-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .manage-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .manage-title-area h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .manage-title-area p {
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s, transform 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-back:hover {
+            color: var(--accent-cyan);
+            transform: translateX(-4px);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .actions-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .action-card {
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+        }
+
+        .action-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin: 0 0 15px 0;
+        }
+
+        .releases-table-container {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .releases-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .releases-table th, .releases-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .releases-table th {
+            background: rgba(255,255,255,0.03);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .releases-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .releases-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .movie-thumb-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .movie-thumb-img {
+            width: 32px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .movie-title-cell {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .movie-year-cell {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Edit Modal */
+        .edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;}
+        .edit-overlay.open{display:flex;}
+        .edit-modal{background:#0e1526;border:1px solid rgba(255,255,255,.08);border-radius:16px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.6);animation:emIn .3s ease forwards;}
+        @keyframes emIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .em-hdr{display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,#0d1730,#101f3a);border-radius:16px 16px 0 0;}
+        .em-hdr h2{font-size:1.15rem;font-weight:700;color:#fff;margin:0;display:flex;align-items:center;gap:10px;}
+        .em-hdr h2 i{color:var(--accent-cyan);}
+        .em-close{background:none;border:none;color:#8892a4;font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:8px;transition:all .2s;}
+        .em-close:hover{color:#fff;background:rgba(255,255,255,.08);}
+        .em-body{padding:24px 28px;}
+        .em-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+        .em-field{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+        .em-lbl{font-size:.72rem;font-weight:600;color:#8892a4;text-transform:uppercase;letter-spacing:.5px;}
+        .em-inp{width:100%;padding:10px 12px;background:#131c32;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#f0f2f8;font-family:inherit;font-size:.85rem;outline:none;transition:all .2s;}
+        .em-inp:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,240,255,.1);}
+        textarea.em-inp{resize:vertical;min-height:70px;}
+        .em-foot{display:flex;gap:12px;justify-content:flex-end;padding:16px 28px;border-top:1px solid rgba(255,255,255,.08);}
+        .btn-em-save{padding:10px 28px;background:linear-gradient(135deg,var(--accent-cyan),#0ad3c1);border:none;border-radius:10px;color:#030409;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;font-family:inherit;}
+        .btn-em-save:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,240,255,.35);}
+        .btn-em-cancel{padding:10px 22px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#8892a4;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s;font-family:inherit;}
+        .btn-em-cancel:hover{background:rgba(255,255,255,.09);color:#fff;}
+        @media(max-width:580px){.em-row{grid-template-columns:1fr;}.em-body{padding:16px;}.em-foot{padding:12px 16px;}}
+
+        /* Custom Toast Notifications */
+        .custom-toast {
+            position: fixed;
+            bottom: 24px;
+            right: -340px;
+            width: 320px;
+            background: rgba(13, 28, 50, 0.96);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.15);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: right 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(12px);
+            text-align: left;
+        }
+        .custom-toast.show {
+            right: 24px;
+        }
+        .custom-toast-content {
+            flex: 1;
+        }
+        .custom-toast-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+        }
+        .custom-toast-msg {
+            font-size: 0.76rem;
+            color: #8892a4;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SECURITY ROUTE GUARD SCRIPT -->
+    <script>
+        const safeSession = {
+            _fallback: {},
+            getItem(key) {
+                try { return window.sessionStorage.getItem(key); } catch (e) { return this._fallback[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.sessionStorage.setItem(key, val); } catch (e) { this._fallback[key] = String(val); }
+            }
+        };
+        const safeStorage = {
+            _fallback: {},
+            getItem(key) {
+                try { return window.localStorage.getItem(key); } catch (e) { return this._fallback[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.localStorage.setItem(key, val); } catch (e) { this._fallback[key] = String(val); }
+            }
+        };
+
+        const sessionUser = safeSession.getItem("current_user") || safeStorage.getItem("current_user");
+        let currentUser = null;
+        if (sessionUser) {
+            try { currentUser = JSON.parse(sessionUser); } catch(e) {}
+        }
+
+        if (!currentUser || currentUser.role !== "admin") {
+            alert("Access Denied: Admin authorization required to access this portal page.");
+            window.location.href = "admin.html";
+        }
+    </script>
+
+    <div class="manage-wrapper">
+        <div class="manage-header">
+            <div class="manage-title-area">
+                <h1>Management Panel</h1>
+                <p>Configure the movie streaming portal system and manage movie releases</p>
+            </div>
+            <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Catalog</a>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- Left sidebar: System settings and Actions -->
+            <div class="actions-panel">
+                <div class="action-card glass-panel" style="border: 1px solid rgba(255,255,255,0.08);">
+                    <h3>Catalog Actions</h3>
+                    <p>Add a new movie catalog release metadata entry directly.</p>
+                    <a href="upload.html" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 0.85rem; padding: 10px 14px;"><i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Publish Release</a>
+                </div>
+
+                <!-- GitHub Cloud Sync Panel -->
+                <div class="action-card glass-panel" style="border: 1px solid rgba(0, 240, 255, 0.2); background: rgba(0, 240, 255, 0.02);">
+                    <h3><i class="fa-brands fa-github" style="color: var(--accent-cyan); margin-right:4px;"></i> GitHub Cloud Sync</h3>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">Movies sync to GitHub automatically. All viewers load from the public URL — no login needed.</p>
+
+                    <div style="padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Status: <span id="gh-status-txt" style="font-weight: 700; color: var(--accent-red);">Token not set</span></div>
+                    </div>
+
+                    <button type="button" class="btn" id="btn-gh-sync-now" style="width: 100%; justify-content: center; font-size: 0.85rem; padding: 10px 14px; margin-bottom: 8px; font-weight: 700; background: rgba(0,240,255,0.12); border: 1px solid var(--accent-cyan); color: var(--accent-cyan);"><i class="fa-solid fa-rotate"></i> Push to Cloud Now</button>
+
+                    <a href="#" id="gh-toggle-settings" style="font-size: 0.72rem; color: var(--accent-cyan); text-decoration: none; display: block; text-align: center; margin-bottom: 5px;"><i class="fa-solid fa-cog"></i> GitHub Settings</a>
+
+                    <div id="gh-settings-fields" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; margin-top: 10px;">
+                        <div class="em-field" style="margin-bottom: 8px;">
+                            <label class="em-lbl" style="font-size: 0.65rem;">GitHub Username</label>
+                            <input type="text" id="gh-owner" class="em-inp" style="padding: 6px 10px; font-size: 0.75rem;" placeholder="e.g. smartelam12-hub">
+                        </div>
+                        <div class="em-field" style="margin-bottom: 8px;">
+                            <label class="em-lbl" style="font-size: 0.65rem;">Repository Name</label>
+                            <input type="text" id="gh-repo" class="em-inp" style="padding: 6px 10px; font-size: 0.75rem;" placeholder="e.g. movie-portal">
+                        </div>
+                        <div class="em-field" style="margin-bottom: 8px;">
+                            <label class="em-lbl" style="font-size: 0.65rem;">Branch</label>
+                            <input type="text" id="gh-branch" class="em-inp" style="padding: 6px 10px; font-size: 0.75rem;" placeholder="main">
+                        </div>
+                        <div class="em-field" style="margin-bottom: 12px;">
+                            <label class="em-lbl" style="font-size: 0.65rem;">GitHub Personal Access Token</label>
+                            <input type="password" id="gh-token" class="em-inp" style="padding: 6px 10px; font-size: 0.75rem;" placeholder="ghp_xxxxxxxxxxxx">
+                            <span style="font-size: 0.62rem; color: var(--text-muted); margin-top: 3px; display: block;">Create at: github.com → Settings → Developer → Tokens → Contents (write)</span>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="btn-gh-save" style="width: 100%; justify-content: center; font-size: 0.78rem; padding: 8px 12px;"><i class="fa-solid fa-floppy-disk"></i> Save GitHub Settings</button>
+                    </div>
+                </div>
+
+                <div class="action-card glass-panel" style="border: 1px solid rgba(255, 74, 96, 0.15); background: rgba(255, 74, 96, 0.02);">
+                    <h3 style="color: #ff4a60;"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
+                    <p>Permanently wipe the entire movies catalog and reload the default catalog dataset seed.</p>
+                    <button type="button" class="btn" id="btn-clear-catalog" style="width: 100%; justify-content: center; background: rgba(255, 74, 96, 0.15); border: 1px solid #ff4a60; color: #ff4a60; font-size: 0.85rem; padding: 10px 14px;"><i class="fa-solid fa-trash-can" style="margin-right: 6px;"></i> Clear Catalog Data</button>
+                </div>
+            </div>
+
+            <!-- Right area: Releases Table -->
+            <div class="releases-table-container glass-panel">
+                <table class="releases-table">
+                    <thead>
+                        <tr>
+                            <th>Release / Title</th>
+                            <th>Type</th>
+                            <th>Quality</th>
+                            <th>Audio Languages</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="releases-table-body">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Edit Movie Modal -->
+    <div class="edit-overlay" id="edit-overlay">
+        <div class="edit-modal">
+            <div class="em-hdr">
+                <h2><i class="fa-solid fa-pen-to-square"></i> Edit Movie Release</h2>
+                <button class="em-close" id="em-close">&times;</button>
+            </div>
+            <div class="em-body">
+                <input type="hidden" id="em-id">
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Movie Title</label>
+                        <input type="text" class="em-inp" id="em-title">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Release Year</label>
+                        <input type="number" class="em-inp" id="em-year" min="1900" max="2030">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Release Type</label>
+                        <select class="em-inp" id="em-type">
+                            <option value="UHD">UHD</option>
+                            <option value="WEB-HD">WEB-HD</option>
+                            <option value="PreDVD">PreDVD</option>
+                            <option value="HDTS">HDTS</option>
+                        </select>
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Quality Label</label>
+                        <input type="text" class="em-inp" id="em-quality">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Languages (comma separated)</label>
+                        <input type="text" class="em-inp" id="em-languages">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Rating</label>
+                        <input type="text" class="em-inp" id="em-rating">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Director</label>
+                        <input type="text" class="em-inp" id="em-director">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Cast</label>
+                        <input type="text" class="em-inp" id="em-cast">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Genre</label>
+                        <input type="text" class="em-inp" id="em-genre">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Duration</label>
+                        <input type="text" class="em-inp" id="em-duration">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Poster URL</label>
+                        <input type="text" class="em-inp" id="em-poster">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Banner URL</label>
+                        <input type="text" class="em-inp" id="em-banner">
+                    </div>
+                </div>
+                <div class="em-field">
+                    <label class="em-lbl">Trailer URL / YouTube ID</label>
+                    <input type="text" class="em-inp" id="em-trailer">
+                </div>
+                <div class="em-field">
+                    <label class="em-lbl">Description / Synopsis</label>
+                    <textarea class="em-inp" id="em-description"></textarea>
+                </div>
+            </div>
+            <div class="em-foot">
+                <button class="btn-em-cancel" id="em-cancel">Cancel</button>
+                <button class="btn-em-save" id="em-save"><i class="fa-solid fa-check" style="margin-right:6px;"></i>Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Dashboard Logic -->
+    <script src="github_sync.js?v=1"></script>
+    <script>
+        function showNotification(title, message, isSuccess = true) {
+            const oldToast = document.querySelector(".custom-toast");
+            if (oldToast) oldToast.remove();
+            
+            const toast = document.createElement("div");
+            toast.className = "custom-toast";
+            if (isSuccess) {
+                toast.style.borderColor = "var(--accent-green)";
+                toast.style.boxShadow = "0 8px 32px rgba(52, 199, 89, 0.15)";
+            } else {
+                toast.style.borderColor = "var(--accent-red)";
+                toast.style.boxShadow = "0 8px 32px rgba(255, 59, 48, 0.15)";
+            }
+            
+            const iconClass = isSuccess ? "fa-circle-check" : "fa-circle-exclamation";
+            const iconColor = isSuccess ? "var(--accent-green)" : "var(--accent-red)";
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass}" style="font-size: 1.4rem; color: ${iconColor};"></i>
+                <div class="custom-toast-content">
+                    <div class="custom-toast-title" style="color: ${isSuccess ? 'var(--accent-green)' : 'var(--accent-red)'}">${title}</div>
+                    <div class="custom-toast-msg">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add("show");
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => {
+                    toast.remove();
+                }, 400);
+            }, 4500);
+        }
+
+        // Load releases
+        let movies = [];
+        function loadMovies() {
+            const stored = safeStorage.getItem("movies_db");
+            if (stored) {
+                try {
+                    movies = JSON.parse(stored) || [];
+                } catch(e) {
+                    movies = [];
+                }
+            } else {
+                movies = [];
+            }
+        }
+
+        // Render Table Body
+        const tbody = document.getElementById("releases-table-body");
+        function renderTable() {
+            loadMovies();
+            tbody.innerHTML = "";
+
+            if (movies.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px 18px;">
+                            No movie releases found in the catalog database. Click "Publish Release" to add one!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            movies.forEach(movie => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>
+                        <div class="movie-thumb-cell">
+                            <img src="${movie.poster}" alt="Poster" class="movie-thumb-img">
+                            <div>
+                                <div class="movie-title-cell">${movie.title}</div>
+                                <div class="movie-year-cell">${movie.year}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-uhd" style="font-size: 0.75rem;">${movie.type}</span></td>
+                    <td><span style="color: var(--accent-cyan); font-weight: 500;">${movie.quality}</span></td>
+                    <td><span style="font-size: 0.85rem; color: #ccc;">${movie.languages.join(", ")}</span></td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button class="btn btn-secondary btn-sm btn-edit-release" style="color: var(--accent-cyan); border-color: rgba(0,240,255,.2); padding: 6px 12px; font-size: 0.8rem; margin-right: 6px;" data-id="${movie.id}">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <button class="btn btn-secondary btn-sm btn-delete-release" style="color: #ff4a60; border-color: rgba(255, 74, 96, 0.2); padding: 6px 12px; font-size: 0.8rem;" data-id="${movie.id}">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Bind Delete Click Handlers
+            tbody.querySelectorAll(".btn-delete-release").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = parseInt(btn.getAttribute("data-id"));
+                    const targetMovie = movies.find(m => m.id === id);
+                    if (!targetMovie) return;
+
+                    if (confirm(`Are you sure you want to permanently delete the release "${targetMovie.title} (${targetMovie.year})"?`)) {
+                        movies = movies.filter(m => m.id !== id);
+                        safeStorage.setItem("movies_db", JSON.stringify(movies));
+                        renderTable();
+                        triggerGDriveUpload(); // Sync deletions
+                    }
+                });
+            });
+
+            // Bind Edit Click Handlers
+            tbody.querySelectorAll(".btn-edit-release").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = parseInt(btn.getAttribute("data-id"));
+                    const movie = movies.find(m => m.id === id);
+                    if (!movie) return;
+                    openEditModal(movie);
+                });
+            });
+        }
+
+        // Edit Modal Logic
+        const editOverlay = document.getElementById("edit-overlay");
+        const emClose = document.getElementById("em-close");
+        const emCancel = document.getElementById("em-cancel");
+        const emSave = document.getElementById("em-save");
+
+        function openEditModal(movie) {
+            document.getElementById("em-id").value = movie.id;
+            document.getElementById("em-title").value = movie.title || "";
+            document.getElementById("em-year").value = movie.year || "";
+            document.getElementById("em-type").value = movie.type || "WEB-HD";
+            document.getElementById("em-quality").value = movie.quality || "";
+            document.getElementById("em-languages").value = (movie.languages || []).join(", ");
+            document.getElementById("em-rating").value = movie.rating || "";
+            document.getElementById("em-director").value = movie.director || "";
+            document.getElementById("em-cast").value = movie.cast || "";
+            document.getElementById("em-genre").value = movie.genre || "";
+            document.getElementById("em-duration").value = movie.duration || "";
+            document.getElementById("em-poster").value = movie.poster || "";
+            document.getElementById("em-banner").value = movie.banner || "";
+            document.getElementById("em-trailer").value = movie.trailer || "";
+            document.getElementById("em-description").value = movie.description || "";
+            editOverlay.classList.add("open");
+        }
+
+        function closeEditModal() {
+            editOverlay.classList.remove("open");
+        }
+
+        emClose.addEventListener("click", closeEditModal);
+        emCancel.addEventListener("click", closeEditModal);
+        editOverlay.addEventListener("click", (e) => {
+            if (e.target === editOverlay) closeEditModal();
+        });
+
+        emSave.addEventListener("click", () => {
+            const id = parseInt(document.getElementById("em-id").value);
+            const idx = movies.findIndex(m => m.id === id);
+            if (idx === -1) { alert("Movie not found."); return; }
+
+            const title = document.getElementById("em-title").value.trim();
+            const year = parseInt(document.getElementById("em-year").value);
+            if (!title || !year) { alert("Title and Year are required."); return; }
+
+            movies[idx].title = title;
+            movies[idx].year = year;
+            movies[idx].type = document.getElementById("em-type").value;
+            movies[idx].quality = document.getElementById("em-quality").value.trim();
+            movies[idx].languages = document.getElementById("em-languages").value.split(",").map(l => l.trim()).filter(l => l);
+            movies[idx].rating = parseFloat(document.getElementById("em-rating").value) || movies[idx].rating;
+            movies[idx].director = document.getElementById("em-director").value.trim();
+            movies[idx].cast = document.getElementById("em-cast").value.trim();
+            movies[idx].genre = document.getElementById("em-genre").value.trim();
+            movies[idx].duration = document.getElementById("em-duration").value.trim();
+            movies[idx].poster = document.getElementById("em-poster").value.trim();
+            movies[idx].banner = document.getElementById("em-banner").value.trim() || movies[idx].poster;
+            movies[idx].trailer = document.getElementById("em-trailer").value.trim();
+            movies[idx].description = document.getElementById("em-description").value.trim();
+
+            safeStorage.setItem("movies_db", JSON.stringify(movies));
+            closeEditModal();
+            renderTable();
+            autoGitHubPush(); // Auto-push every edit to cloud
+        });
+
+        // Initialize Table
+        renderTable();
+
+        // Clear Catalog Handler
+        const btnClear = document.getElementById("btn-clear-catalog");
+        btnClear.addEventListener("click", () => {
+            if (confirm("WARNING: You are about to clear all custom movies from the database catalog. This action is irreversible. Proceed?")) {
+                if (confirm("Confirming a second time: Are you absolutely sure you want to delete all entries?")) {
+                    safeStorage.setItem("movies_db", JSON.stringify([]));
+                    renderTable();
+                    triggerGDriveUpload(); // Sync wiping
+                    showNotification("Catalog Reset", "Catalog database wiped successfully. Refresh the homepage to see changes.", true);
+                }
+            }
+        });
+
+        // -------------------------------------------------------------
+        // GITHUB SYNC MANAGER HANDLER
+        // -------------------------------------------------------------
+
+        // Load saved settings into fields
+        document.getElementById("gh-owner").value  = localStorage.getItem("gh_owner")  || "smartelam12-hub";
+        document.getElementById("gh-repo").value   = localStorage.getItem("gh_repo")   || "movie-portal";
+        document.getElementById("gh-branch").value = localStorage.getItem("gh_branch") || "main";
+
+        function updateGhStatus() {
+            const txt = document.getElementById("gh-status-txt");
+            if (GitHubSync && GitHubSync.hasToken) {
+                txt.textContent = "Connected — " + (GitHubSync.owner + "/" + GitHubSync.repo);
+                txt.style.color = "var(--accent-green)";
+            } else {
+                txt.textContent = "Token not set — changes won't sync";
+                txt.style.color = "var(--accent-red)";
+            }
+        }
+        updateGhStatus();
+
+        // Toggle settings panel
+        document.getElementById("gh-toggle-settings").addEventListener("click", (e) => {
+            e.preventDefault();
+            const fields = document.getElementById("gh-settings-fields");
+            fields.style.display = fields.style.display === "none" ? "block" : "none";
+        });
+
+        // Save GitHub settings
+        document.getElementById("btn-gh-save").addEventListener("click", () => {
+            const owner  = document.getElementById("gh-owner").value.trim();
+            const repo   = document.getElementById("gh-repo").value.trim();
+            const branch = document.getElementById("gh-branch").value.trim() || "main";
+            const token  = document.getElementById("gh-token").value.trim();
+            GitHubSync.setConfig({ owner, repo, branch, token });
+            showNotification("Settings Saved", "GitHub config saved. Movies will now sync to GitHub automatically!", true);
+            updateGhStatus();
+        });
+
+        // Manual push
+        document.getElementById("btn-gh-sync-now").addEventListener("click", async () => {
+            const btn = document.getElementById("btn-gh-sync-now");
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Pushing...';
+            try {
+                const localMovies = JSON.parse(safeStorage.getItem("movies_db") || "[]");
+                await GitHubSync.saveMovies(localMovies);
+                showNotification("Cloud Sync", "Movies pushed to GitHub! All visitors will see them in seconds.", true);
+            } catch (e) {
+                showNotification("Sync Failed", e.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Push to Cloud Now';
+            }
+        });
+
+        // Auto-push helper (called after every save/edit)
+        async function autoGitHubPush() {
+            if (!GitHubSync || !GitHubSync.hasToken) return;
+            try {
+                const localMovies = JSON.parse(safeStorage.getItem("movies_db") || "[]");
+                await GitHubSync.saveMovies(localMovies);
+                showNotification("Cloud Sync", "Changes saved and pushed to cloud automatically!", true);
+            } catch (e) {
+                showNotification("Auto-Sync Failed", e.message, false);
+            }
+        }
+    </script>
+</body>
+</html>

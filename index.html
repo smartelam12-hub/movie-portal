@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Time - Premium Tamil, Malayalam, Telugu, Kannada, Hindi Movie Portal</title>
+    <meta name="description" content="Discover and download the latest Tamil, Malayalam, Telugu, Kannada, Hindi and English movies in 4K UHD, WEB-HD, and High Quality PreDVD. Authentic and verified magnet downloads.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    
+    <!-- Background overlay for cinema mood -->
+    <div class="cinema-glow"></div>
+
+    <!-- Navigation Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="#" class="brand-logo">
+                <img src="logo.jpg" alt="Movie Time Logo" class="brand-logo-img">
+                <span class="brand-logo-text">Movie Time</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#" class="nav-link active" id="nav-btn-home"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="upload.html" class="nav-link" id="btn-upload-toggle" style="display: none;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Movie</a>
+                <a href="management.html" class="nav-link" id="btn-admin-toggle" style="display: none;"><i class="fa-solid fa-sliders"></i> Management Panel</a>
+                
+                <!-- Guest View: Admin Login Link -->
+                <a href="admin.html" class="nav-link" id="btn-nav-signin" style="font-weight: 600;"><i class="fa-solid fa-lock"></i> Admin Login</a>
+                <span id="btn-nav-signup" style="display: none;"></span>
+                
+                <!-- Logged In View: User Avatar Dropdown -->
+                <div class="user-menu-container" id="user-menu-container" style="display: none;">
+                    <button class="user-menu-trigger" id="user-menu-trigger">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span class="user-display-name" id="user-display-name">Username</span>
+                        <i class="fa-solid fa-caret-down"></i>
+                    </button>
+                    <div class="user-dropdown-menu" id="user-dropdown-menu">
+                        <a href="profile.html" id="dropdown-btn-profile"><i class="fa-solid fa-id-card"></i> My Profile</a>
+                        <a href="#" id="dropdown-btn-signout" style="color: var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search movies, cast, directors...">
+                <button id="search-btn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+            
+            <button class="mobile-nav-toggle" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer">
+        <div class="drawer-header">
+            <span class="brand-logo"><img src="logo.jpg" alt="Movie Time Logo" class="brand-logo-img"><span class="brand-logo-text">Movie Time</span></span>
+            <button class="drawer-close" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-links">
+            <a href="#" class="drawer-link active" id="nav-btn-home-mobile"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="upload.html" class="drawer-link" id="btn-upload-toggle-mobile" style="display: none;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Movie</a>
+            <a href="management.html" class="drawer-link" id="btn-admin-toggle-mobile" style="display: none;"><i class="fa-solid fa-sliders"></i> Management Panel</a>
+            
+            <div class="drawer-divider" style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 15px 0;"></div>
+            
+            <!-- Guest View: Subtle Admin Login Link -->
+            <a href="admin.html" class="drawer-link" id="btn-nav-signin-mobile" style="text-align: center; justify-content: center; font-weight: 600; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px;"><i class="fa-solid fa-right-to-bracket"></i> Admin Login</a>
+            <span id="btn-nav-signup-mobile" style="display: none;"></span>
+            
+            <!-- Logged In View -->
+            <div class="mobile-user-info" id="mobile-user-info" style="display: none;">
+                <div class="mobile-user-details" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 10px;">
+                    <i class="fa-solid fa-circle-user" style="font-size: 1.5rem; color: var(--accent-cyan);"></i>
+                    <span id="mobile-user-display-name" style="font-weight: 700; color: #fff;">Username</span>
+                </div>
+                <a href="profile.html" class="drawer-link" id="dropdown-btn-profile-mobile"><i class="fa-solid fa-id-card"></i> My Profile</a>
+                <a href="#" class="drawer-link" id="dropdown-btn-signout-mobile" style="color: var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+            </div>
+        </div>
+    </div>
+    <div class="drawer-overlay"></div>
+
+    <!-- Main Container -->
+    <main class="portal-container">
+        
+        <!-- Alerts and Announcement Widgets -->
+        <section class="announcements-area">
+            <!-- Telegram & Contact widget -->
+            <div class="telegram-banner glass-panel">
+                <div class="tg-left">
+                    <span class="tg-badge">OFFICIAL UPDATE CHANNEL</span>
+                    <h3>Join Our Telegram for Instant Movie Alerts</h3>
+                    <p>Get notified the second a new torrent is uploaded. No spam, just magnet links.</p>
+                </div>
+                <div class="tg-right">
+                    <a href="https://t.me/movietime1543" target="_blank" rel="noopener noreferrer" class="tg-join-btn btn-glowing">
+                        JOIN NOW <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hero Section -->
+        <section class="hero-section glass-panel" id="hero-banner" style="display: none;">
+            <!-- Populate dynamically from JS -->
+        </section>
+
+        <!-- Movie Filter System -->
+        <section class="filter-section glass-panel">
+            <div class="filter-group">
+                <span class="filter-label"><i class="fa-solid fa-language"></i> Language:</span>
+                <div class="filter-tags" id="language-filters">
+                    <button class="filter-tag active" data-lang="all">All Languages</button>
+                    <button class="filter-tag" data-lang="Tamil">Tamil</button>
+                    <button class="filter-tag" data-lang="Telugu">Telugu</button>
+                    <button class="filter-tag" data-lang="Malayalam">Malayalam</button>
+                    <button class="filter-tag" data-lang="Kannada">Kannada</button>
+                    <button class="filter-tag" data-lang="Hindi">Hindi</button>
+                    <button class="filter-tag" data-lang="English">English</button>
+                </div>
+            </div>
+
+            <div class="filter-row-secondary">
+                <div class="filter-group">
+                    <span class="filter-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Quality:</span>
+                    <div class="filter-tags" id="quality-filters">
+                        <button class="filter-tag active" data-qual="all">All Qualities</button>
+                        <button class="filter-tag" data-qual="UHD">4K UHD</button>
+                        <button class="filter-tag" data-qual="WEB-HD">WEB-HD</button>
+                        <button class="filter-tag" data-qual="PreDVD">PreDVD</button>
+                        <button class="filter-tag" data-qual="HDTS">HDTS</button>
+                    </div>
+                </div>
+
+                <div class="sorting-dropdown">
+                    <label for="sort-select"><i class="fa-solid fa-sort"></i> Sort By:</label>
+                    <select id="sort-select">
+                        <option value="latest">Latest Uploads</option>
+                        <option value="rating">Top Rated</option>
+                        <option value="title">Alphabetical</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Movie Catalog Grid -->
+        <section class="catalog-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-film"></i> Latest Torrents & Direct Downloads</h2>
+                <div class="results-counter" id="results-count">Showing 22 movies</div>
+            </div>
+            
+            <div class="movie-grid" id="movie-grid-container">
+                <!-- Movie cards rendered dynamically via JS -->
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer">
+        <div class="footer-container">
+            <div class="footer-col brand-info">
+                <h3>MOVIE TIME</h3>
+                <p>The premium, secure destination for high fidelity cinema downloads. Always remember to search for the latest mirrors to evade geo-blocking.</p>
+                <div class="footer-socials">
+                    <a href="https://t.me/movietime1543" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="mailto:smartelam12@gmail.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-col links-list">
+                <h4>Browse Categories</h4>
+                <ul>
+                    <li><a href="#" class="filter-shortcut" data-lang="Tamil">Tamil Movies</a></li>
+                    <li><a href="#" class="filter-shortcut" data-lang="Telugu">Telugu Movies</a></li>
+                    <li><a href="#" class="filter-shortcut" data-lang="Malayalam">Malayalam Movies</a></li>
+                    <li><a href="#" class="filter-shortcut" data-lang="Hindi">Hindi Movies</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col links-list">
+                <h4>Quality Formats</h4>
+                <ul>
+                    <li><a href="#" class="quality-shortcut" data-qual="UHD">4K UHD Untouched</a></li>
+                    <li><a href="#" class="quality-shortcut" data-qual="WEB-HD">1080p WEB-HD AVC</a></li>
+                    <li><a href="#" class="quality-shortcut" data-qual="PreDVD">HQ Real PreDVDRip</a></li>
+                    <li><a href="#" class="quality-shortcut" data-qual="HDTS">HQ Line Audio HDTS</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col contact-col">
+                <h4>Contact & Feedback</h4>
+                <p>For DMCA requests or inquiries, reach out at:</p>
+                <span class="email-text"><i class="fa-solid fa-envelope"></i> smartelam12@gmail.com</span>
+                <p class="copyright">&copy; 2026 Movie Time. Designed for cinema lovers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DETAILED MOVIE DIALOG MODAL -->
+    <div class="modal" id="movie-details-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container glass-panel">
+            <button class="modal-close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-backdrop-blur" id="modal-bg-blur"></div>
+            
+            <div class="modal-content">
+                <div class="modal-left">
+                    <img src="" alt="Movie Poster" id="modal-poster" class="modal-poster-img">
+                </div>
+                
+                <div class="modal-right">
+                    <div class="modal-badges" id="modal-badge-container">
+                        <!-- Badges rendered via JS -->
+                    </div>
+                    <div class="modal-header-actions" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 5px;">
+                        <h2 class="modal-title" id="modal-title-text" style="margin: 0; line-height: 1.2;">Movie Title</h2>
+                    </div>
+                    
+                    <div class="modal-metadata">
+                        <span id="modal-year"><i class="fa-solid fa-calendar"></i> 2026</span>
+                        <span id="modal-duration"><i class="fa-solid fa-clock"></i> 2h 15m</span>
+                        <span id="modal-rating"><i class="fa-solid fa-star"></i> 7.5</span>
+                    </div>
+
+                    <div class="modal-info-grid">
+                        <div><strong>Genre:</strong> <span id="modal-genre">Drama, Action</span></div>
+                        <div><strong>Director:</strong> <span id="modal-director">Name</span></div>
+                        <div><strong>Cast:</strong> <span id="modal-cast">Actors</span></div>
+                    </div>
+                    
+                    <div class="modal-synopsis">
+                        <h3>Synopsis</h3>
+                        <p id="modal-description">Detailed description goes here...</p>
+                    </div>
+
+                    <!-- Modal Tabs -->
+                    <div class="modal-tabs">
+                        <button class="modal-tab active" data-tab="downloads"><i class="fa-solid fa-download"></i> Downloads</button>
+                        <button class="modal-tab" data-tab="watch-online"><i class="fa-solid fa-circle-play"></i> Watch Trailer</button>
+                    </div>
+
+                    <!-- Downloads Section -->
+                    <div class="tab-content active" id="tab-downloads">
+                        <div class="table-container">
+                            <table class="downloads-table">
+                                <thead>
+                                    <tr>
+                                        <th>Resolution</th>
+                                        <th>Codec</th>
+                                        <th>Audio</th>
+                                        <th>Size</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modal-downloads-list">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="toast" id="copy-toast">Magnet link copied to clipboard!</div>
+                    </div>
+
+                    <!-- Watch Online Section -->
+                    <div class="tab-content" id="tab-watch-online">
+                        <div class="video-player-container" style="position: relative;">
+                            <div class="player-overlay" id="player-start-overlay" style="cursor: pointer;">
+                                <i class="fa-solid fa-circle-play"></i>
+                                <span>Play Stream</span>
+                            </div>
+                            <div class="video-loader" id="player-spinner" style="display: none;">
+                                <div class="spinner"></div>
+                                <span id="player-status-text">Analyzing stream source...</span>
+                            </div>
+                            <video id="online-video" width="100%" controls style="display:none; max-height: 450px; border-radius: 8px;">
+                                Your browser does not support HTML5 video.
+                            </video>
+                            <iframe id="online-iframe" width="100%" height="360" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="display:none; border-radius: 8px;"></iframe>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin upload forms and management panels have been migrated to upload.html and management.html dedicated pages -->
+
+    <!-- Admin Login has been migrated to dedicated admin.html page -->
+
+
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/webtorrent@1/webtorrent.min.js"></script>
+    <script src="github_sync.js?v=1"></script>
+    <script src="movies.js?v=2"></script>
+    <script src="app.js?v=3"></script>
+</body>
+</html>

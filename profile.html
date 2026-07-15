@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Movie Time</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Unified CSS Variables -->
+    <link rel="stylesheet" href="style.css?v=2">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 50% 50%, #0d1224 0%, #030409 100%);
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+            font-family: var(--font-sans), sans-serif;
+            padding-bottom: 3rem;
+        }
+
+        /* Dynamic Blurred Favorite Poster Background */
+        .dynamic-poster-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(90px) brightness(0.18);
+            opacity: 0.85;
+            pointer-events: none;
+            transition: background-image 0.5s ease;
+        }
+
+        .profile-container-wrapper {
+            max-width: 1050px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Profile Header Component */
+        .profile-header-card {
+            background: rgba(14, 19, 38, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .profile-header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        /* Large circular profile picture with glowing border */
+        .profile-avatar-container {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+            background: #0e1326;
+            border: 3px solid var(--accent-cyan);
+            box-shadow: 0 0 20px var(--accent-cyan-glow);
+            overflow: visible;
+        }
+
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .profile-avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--accent-cyan);
+        }
+
+        /* Pulsing Online Status Indicator */
+        .online-dot {
+            width: 18px;
+            height: 18px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            border: 3px solid #060913;
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            box-shadow: 0 0 10px rgba(52, 199, 89, 0.6);
+            animation: pulse-green 1.8s infinite alternate;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4); }
+            100% { transform: scale(1.15); box-shadow: 0 0 8px 4px rgba(52, 199, 89, 0.2); }
+        }
+
+        .profile-identity h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Verified badge */
+        .verified-badge {
+            color: var(--accent-cyan);
+            font-size: 1.15rem;
+        }
+
+        .profile-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 8px 0 15px 0;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .profile-meta-row span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Membership crown badge */
+        .membership-badge-premium {
+            background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .membership-badge-basic {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Completion Progress */
+        .progress-box {
+            max-width: 250px;
+            width: 100%;
+        }
+
+        .progress-lbl {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan) 0%, #0ad3c1 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        /* Grid Layout */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 310px 1fr;
+            gap: 2rem;
+        }
+
+        .profile-card {
+            background: rgba(14, 19, 38, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .profile-card h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-card h3 i {
+            color: var(--accent-cyan);
+        }
+
+        /* Sidebar stats */
+        .sidebar-item {
+            margin-bottom: 18px;
+        }
+
+        .sidebar-lbl {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-val {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        /* Genre badges */
+        .genre-badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 5px;
+        }
+
+        .genre-badge-item {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            color: var(--accent-cyan);
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        /* Movie Personality Insights */
+        .insights-card {
+            background: linear-gradient(135deg, rgba(10, 255, 235, 0.05) 0%, rgba(14, 19, 38, 0.45) 100%);
+            border-color: rgba(10, 255, 235, 0.15);
+        }
+
+        .insights-score-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .insights-score-circle {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(10,255,235,0.08);
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        /* Quick Action list */
+        .actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-link-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .action-link-btn:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.12);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* Downloads List / Table */
+        .dl-mgr-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dl-mgr-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            gap: 15px;
+        }
+
+        .dl-mgr-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dl-mgr-poster {
+            width: 32px;
+            height: 46px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .dl-mgr-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .dl-mgr-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Continue Watching check-list */
+        .continue-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .continue-check-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #ccc;
+            flex-grow: 1;
+        }
+
+        .continue-check-wrap input {
+            cursor: pointer;
+            accent-color: var(--accent-cyan);
+        }
+
+        .continue-check-wrap.checked span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .continue-del-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.25);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .continue-del-btn:hover {
+            color: var(--accent-red);
+        }
+
+        /* Add checklist input */
+        .continue-add-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .continue-add-inp {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 0.82rem;
+            outline: none;
+        }
+
+        .continue-add-inp:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .continue-add-btn {
+            background: var(--accent-cyan);
+            border: none;
+            color: #000;
+            border-radius: 6px;
+            padding: 0 14px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .continue-add-btn:hover {
+            transform: scale(1.03);
+        }
+
+        /* Search tags */
+        .search-history-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .search-history-tag {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #ccc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Edit Profile Modal */
+        .edit-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .edit-overlay.open {
+            display: flex;
+        }
+
+        .edit-modal {
+            background: #0e1526;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            animation: emIn 0.3s ease forwards;
+        }
+
+        .em-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(135deg, #0d1730, #101f3a);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .em-hdr h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .em-hdr h2 i {
+            color: var(--accent-cyan);
+        }
+
+        .em-close {
+            background: none;
+            border: none;
+            color: #8892a4;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .em-close:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .em-body {
+            padding: 20px 24px;
+        }
+
+        .em-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .em-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .em-lbl {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #8892a4;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .em-inp {
+            width: 100%;
+            padding: 10px 12px;
+            background: #131c32;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: #f0f2f8;
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .em-inp:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0,240,255,0.1);
+        }
+
+        textarea.em-inp {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .em-foot {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .btn-em-save {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), #0ad3c1);
+            border: none;
+            border-radius: 8px;
+            color: #030409;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-em-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0,240,255,0.35);
+        }
+
+        .btn-em-cancel {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #8892a4;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-em-cancel:hover {
+            background: rgba(255,255,255,0.09);
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 1.5rem;
+            }
+            .profile-header-left {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .em-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Blurred Poster Background -->
+    <div class="dynamic-poster-bg" id="profile-dynamic-bg"></div>
+
+    <!-- Navigation Header -->
+    <header class="main-header" style="position: relative; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(6, 9, 19, 0.8); backdrop-filter: blur(12px);">
+        <div class="header-container">
+            <a href="index.html" class="brand-logo">
+                <img src="logo.jpg" alt="Movie Time Logo" class="brand-logo-img">
+                <span class="brand-logo-text">Movie Time</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="index.html" class="nav-link"><i class="fa-solid fa-arrow-left"></i> Back to Catalog</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="profile-container-wrapper">
+        
+        <!-- PROFILE HEADER CARD -->
+        <div class="profile-header-card">
+            <div class="profile-header-left">
+                <div class="profile-avatar-container">
+                    <img src="" alt="Avatar" class="profile-avatar-img" id="profile-avatar" style="display: none;">
+                    <div class="profile-avatar-placeholder" id="profile-avatar-ph">
+                        <i class="fa-solid fa-circle-user"></i>
+                    </div>
+                    <div class="online-dot"></div>
+                </div>
+                <div class="profile-identity">
+                    <h1>
+                        <span id="profile-fullname">Full Name</span>
+                        <i class="fa-solid fa-circle-check verified-badge" id="profile-verified" title="Verified Member"></i>
+                    </h1>
+                    <div class="profile-meta-row">
+                        <span id="profile-username">@username</span>
+                        <span>•</span>
+                        <span id="profile-membership">Premium</span>
+                        <span>•</span>
+                        <span id="profile-joindate"><i class="fa-regular fa-calendar"></i> Joined Jan 2026</span>
+                    </div>
+                    <div id="profile-bio-snippet" style="font-size: 0.88rem; color: #ccc; max-width: 450px; line-height: 1.4; margin-top: 5px;">Short bio will appear here.</div>
+                </div>
+            </div>
+
+            <!-- Profile Completion Tracker -->
+            <div class="progress-box">
+                <div class="progress-lbl">
+                    <span>Profile Strength</span>
+                    <span id="progress-percent">80%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD GRID -->
+        <div class="profile-grid">
+            
+            <!-- Left Sidebar -->
+            <div class="profile-sidebar">
+                
+                <!-- Quick Details -->
+                <div class="profile-card">
+                    <h3><i class="fa-solid fa-address-card"></i> Member Card</h3>
+                    <div class="sidebar-item">
+                        <div class="sidebar-lbl">Email Address</div>
+                        <div class="sidebar-val" id="profile-email">—</div>
+                    </div>
+                    <div class="sidebar-item">
+                        <div class="sidebar-lbl">Country / Location</div>
+                        <div class="sidebar-val" id="profile-country">Not set</div>
+                    </div>
+                    <div class="sidebar-item">
+                        <div class="sidebar-lbl">Preferred Language</div>
+                        <div class="sidebar-val" id="profile-language">Tamil</div>
+                    </div>
+                    <div class="sidebar-item" id="profile-sync-item" style="display: none; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 10px; margin-top: 10px;">
+                        <div class="sidebar-lbl"><i class="fa-brands fa-google-drive" style="color: var(--accent-cyan); font-size: 0.72rem;"></i> Cloud Sync</div>
+                        <div class="sidebar-val" id="profile-sync-val" style="font-size: 0.8rem; font-weight: 700;">Active</div>
+                    </div>
+                </div>
+
+                <!-- Favorite Genres & Dynamic Insights -->
+                <div class="profile-card insights-card">
+                    <h3><i class="fa-solid fa-brain"></i> AI Movie Insights</h3>
+                    <div class="sidebar-item">
+                        <div class="sidebar-lbl">Movie Personality</div>
+                        <div class="sidebar-val" id="insights-personality">Cinematic Enthusiast</div>
+                    </div>
+                    <div class="sidebar-item">
+                        <div class="sidebar-lbl">Favorite Genres</div>
+                        <div class="genre-badge-list" id="insights-genres">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="insights-score-box">
+                        <div class="insights-score-circle" id="insights-score">94%</div>
+                        <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 700; line-height: 1.3; text-transform: uppercase;">
+                            Catalog Match Score
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="profile-card">
+                    <h3><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
+                    <div class="actions-list">
+                        <button class="action-link-btn" id="btn-edit-trigger"><i class="fa-solid fa-pen-to-square" style="color: var(--accent-cyan);"></i> Edit Profile</button>
+                        <button class="action-link-btn" id="btn-clear-searches"><i class="fa-solid fa-history" style="color: var(--accent-gold);"></i> Clear Search History</button>
+                        <button class="action-link-btn" id="btn-logout" style="color: var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i> Log Out</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Content Panels -->
+            <div class="profile-main-panels">
+
+                <!-- Favorite Actor and Director -->
+                <div class="profile-card">
+                    <h3><i class="fa-solid fa-clapperboard"></i> Favorites Spotlight</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <div class="sidebar-lbl" style="margin-bottom: 6px;"><i class="fa-solid fa-user-tie"></i> Favorite Director</div>
+                            <div class="sidebar-val" id="profile-fav-director" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 8px;">Not set</div>
+                        </div>
+                        <div>
+                            <div class="sidebar-lbl" style="margin-bottom: 6px;"><i class="fa-solid fa-star"></i> Favorite Actor</div>
+                            <div class="sidebar-val" id="profile-fav-actor" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 8px;">Not set</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Manager -->
+                <div class="profile-card">
+                    <h3><i class="fa-solid fa-download"></i> Download Manager</h3>
+                    <div class="dl-mgr-list" id="download-manager-list">
+                        <!-- Loaded dynamically from downloads_history -->
+                    </div>
+                </div>
+
+                <!-- Continue Watching checklist -->
+                <div class="profile-card">
+                    <h3><i class="fa-solid fa-list-check"></i> Continue Watching Reminders</h3>
+                    <div id="continue-watching-list">
+                        <!-- Checklist loaded dynamically -->
+                    </div>
+                    <div class="continue-add-row">
+                        <input type="text" class="continue-add-inp" id="continue-add-input" placeholder="e.g. Jailer (2023) - 1h 45m left...">
+                        <button class="continue-add-btn" id="btn-add-continue"><i class="fa-solid fa-plus"></i> Add</button>
+                    </div>
+                </div>
+
+                <!-- Recently Searched Movies -->
+                <div class="profile-card">
+                    <h3><i class="fa-solid fa-magnifying-glass"></i> Recently Searched Movies</h3>
+                    <div class="search-history-tags" id="search-history-tags-container">
+                        <!-- Tags loaded dynamically from recent_searches -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- EDIT PROFILE MODAL OVERLAY -->
+    <div class="edit-overlay" id="edit-overlay">
+        <div class="edit-modal">
+            <div class="em-hdr">
+                <h2><i class="fa-solid fa-pen-to-square"></i> Edit Profile</h2>
+                <button class="em-close" id="btn-edit-close">&times;</button>
+            </div>
+            <div class="em-body">
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Display Name</label>
+                        <input type="text" class="em-inp" id="edit-fullname">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Country</label>
+                        <input type="text" class="em-inp" id="edit-country">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Language</label>
+                        <select class="em-inp" id="edit-language">
+                            <option value="Tamil">Tamil</option>
+                            <option value="Malayalam">Malayalam</option>
+                            <option value="Telugu">Telugu</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="English">English</option>
+                        </select>
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Avatar URL</label>
+                        <input type="text" class="em-inp" id="edit-avatar" placeholder="https://url-to-image.png">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field">
+                        <label class="em-lbl">Favorite Director</label>
+                        <input type="text" class="em-inp" id="edit-fav-director">
+                    </div>
+                    <div class="em-field">
+                        <label class="em-lbl">Favorite Actor</label>
+                        <input type="text" class="em-inp" id="edit-fav-actor">
+                    </div>
+                </div>
+                <div class="em-row">
+                    <div class="em-field" style="grid-column: span 2;">
+                        <label class="em-lbl">Favorite Movie Poster URL (Dynamic Background)</label>
+                        <input type="text" class="em-inp" id="edit-poster-bg" placeholder="https://url-to-movie-poster.png">
+                    </div>
+                </div>
+                <div class="em-field">
+                    <label class="em-lbl">Favorite Genres (comma separated)</label>
+                    <input type="text" class="em-inp" id="edit-genres" placeholder="e.g. Action, Thriller, Sci-Fi">
+                </div>
+                <div class="em-field">
+                    <label class="em-lbl">Short Bio</label>
+                    <textarea class="em-inp" id="edit-bio" rows="3" placeholder="Write a short summary..."></textarea>
+                </div>
+            </div>
+            <div class="em-foot">
+                <button class="btn-em-cancel" id="btn-edit-cancel">Cancel</button>
+                <button class="btn-em-save" id="btn-edit-save"><i class="fa-solid fa-check" style="margin-right:6px;"></i>Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Controller Logic -->
+    <script src="gdrive_v3.js"></script>
+    <script>
+        const safeSession = {
+            _fallback: {},
+            getItem(key) {
+                try { return window.sessionStorage.getItem(key); } catch (e) { return this._fallback[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.sessionStorage.setItem(key, val); } catch (e) { this._fallback[key] = String(val); }
+            },
+            removeItem(key) {
+                try { window.sessionStorage.removeItem(key); } catch (e) { delete this._fallback[key]; }
+            }
+        };
+        const safeStorage = {
+            _fallback: {},
+            getItem(key) {
+                try { return window.localStorage.getItem(key); } catch (e) { return this._fallback[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.localStorage.setItem(key, val); } catch (e) { this._fallback[key] = String(val); }
+            },
+            removeItem(key) {
+                try { window.localStorage.removeItem(key); } catch (e) { delete this._fallback[key]; }
+            }
+        };
+
+        // Redirect to admin if not logged in
+        let currentUser = null;
+        try {
+            currentUser = JSON.parse(safeSession.getItem("current_user") || safeStorage.getItem("current_user"));
+        } catch(e){}
+
+        if (!currentUser) {
+            alert("Please log in to access your profile.");
+            window.location.href = "admin.html";
+        }
+
+        // Initialize lists
+        function renderProfile() {
+            // Reload user data from users_db to match edits
+            const users = JSON.parse(safeStorage.getItem("users_db") || "[]");
+            const freshUser = users.find(u => u.username === currentUser.username) || currentUser;
+            currentUser = freshUser;
+
+            // Populate view elements
+            document.getElementById("profile-fullname").textContent = currentUser.name || "No Name";
+            document.getElementById("profile-username").textContent = "@" + currentUser.username;
+            document.getElementById("profile-joindate").innerHTML = `<i class="fa-regular fa-calendar"></i> Joined Jan 2026`;
+            
+            // verified checkmark logic
+            document.getElementById("profile-verified").style.display = currentUser.role === "admin" ? "inline" : "none";
+
+            // email, country, language, bio
+            document.getElementById("profile-email").textContent = currentUser.email || "—";
+            document.getElementById("profile-country").textContent = currentUser.country || "Not set";
+            document.getElementById("profile-language").textContent = currentUser.preferredLanguage || "Tamil";
+            document.getElementById("profile-bio-snippet").textContent = currentUser.bio || "Write something about yourself by editing your profile!";
+
+            // fav actor/director
+            document.getElementById("profile-fav-director").textContent = currentUser.favDirector || "Not set";
+            document.getElementById("profile-fav-actor").textContent = currentUser.favActor || "Not set";
+
+            // membership badge style
+            const isPremium = (currentUser.membership || "Basic").toLowerCase() === "premium";
+            const memBadge = document.getElementById("profile-membership");
+            memBadge.className = isPremium ? "membership-badge-premium" : "membership-badge-basic";
+            memBadge.innerHTML = isPremium ? `<i class="fa-solid fa-crown"></i> Premium` : `<i class="fa-solid fa-circle-user"></i> Basic`;
+
+            // avatar
+            const avatarImg = document.getElementById("profile-avatar");
+            const avatarPh = document.getElementById("profile-avatar-ph");
+            if (currentUser.avatar && currentUser.avatar.trim()) {
+                avatarImg.src = currentUser.avatar.trim();
+                avatarImg.style.display = "block";
+                avatarPh.style.display = "none";
+            } else {
+                avatarImg.style.display = "none";
+                avatarPh.style.display = "flex";
+            }
+
+            // dynamic blurred background
+            const dynamicBg = document.getElementById("profile-dynamic-bg");
+            if (currentUser.favPosterBg && currentUser.favPosterBg.trim()) {
+                dynamicBg.style.backgroundImage = `url('${currentUser.favPosterBg.trim()}')`;
+            } else {
+                dynamicBg.style.backgroundImage = "none";
+            }
+
+            // Calculate Profile Strength
+            let score = 20; // Starts at 20% for username + password
+            if (currentUser.name) score += 15;
+            if (currentUser.email) score += 15;
+            if (currentUser.country) score += 10;
+            if (currentUser.bio) score += 15;
+            if (currentUser.avatar) score += 10;
+            if (currentUser.favDirector) score += 5;
+            if (currentUser.favActor) score += 5;
+            if (currentUser.genres) score += 5;
+
+            document.getElementById("progress-percent").textContent = score + "%";
+            document.getElementById("progress-bar").style.width = score + "%";
+
+            // Dynamic AI Insights & Personality based on genres
+            const genresStr = currentUser.genres || "";
+            const genreArr = genresStr.split(",").map(g => g.trim()).filter(g => g);
+            const insightsContainer = document.getElementById("insights-genres");
+            insightsContainer.innerHTML = "";
+            
+            if (genreArr.length === 0) {
+                insightsContainer.innerHTML = `<span style="font-size:0.75rem; color:var(--text-muted);">No genres set</span>`;
+                document.getElementById("insights-personality").textContent = "Cinematic Explorer";
+            } else {
+                genreArr.forEach(g => {
+                    const pill = document.createElement("span");
+                    pill.className = "genre-badge-item";
+                    pill.textContent = g;
+                    insightsContainer.appendChild(pill);
+                });
+
+                // Compute custom personality matching title
+                if (genresStr.toLowerCase().includes("action") && genresStr.toLowerCase().includes("thriller")) {
+                    document.getElementById("insights-personality").textContent = "Action Thriller Enthusiast";
+                } else if (genresStr.toLowerCase().includes("drama") || genresStr.toLowerCase().includes("romance")) {
+                    document.getElementById("insights-personality").textContent = "Dramatic Cinephile";
+                } else if (genresStr.toLowerCase().includes("sci-fi") || genresStr.toLowerCase().includes("fantasy")) {
+                    document.getElementById("insights-personality").textContent = "Sci-Fi Visionary";
+                } else {
+                    document.getElementById("insights-personality").textContent = "Curated Genre Connoisseur";
+                }
+            }
+
+            // AI Match score calculation
+            const aiScore = Math.min(100, 60 + (genreArr.length * 8));
+            document.getElementById("insights-score").textContent = aiScore + "%";
+
+            // Render download manager list from storage
+            renderDownloadsList();
+
+            // Render checklist
+            renderChecklist();
+
+            // Render search history tags
+            renderSearchHistory();
+
+            // GDrive status update
+            const syncItem = document.getElementById("profile-sync-item");
+            const syncVal = document.getElementById("profile-sync-val");
+            if (typeof GDriveSync !== "undefined") {
+                const state = GDriveSync.getStatus();
+                if (state.hasCredentials && state.isAuthorized) {
+                    syncItem.style.display = "block";
+                    syncVal.textContent = "Synced to Cloud";
+                    syncVal.style.color = "var(--accent-green)";
+                } else if (state.hasCredentials) {
+                    syncItem.style.display = "block";
+                    syncVal.textContent = "Linked (Offline)";
+                    syncVal.style.color = "var(--accent-gold)";
+                } else {
+                    syncItem.style.display = "none";
+                }
+            }
+        }
+
+        // Render downloaded movies
+        function renderDownloadsList() {
+            const list = document.getElementById("download-manager-list");
+            list.innerHTML = "";
+            let dlHistory = [];
+            try { dlHistory = JSON.parse(safeStorage.getItem("downloads_history") || "[]"); } catch(e){}
+
+            if (dlHistory.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align:center; padding: 25px; color: var(--text-muted); font-size: 0.82rem; font-style: italic;">
+                        No torrent/direct downloads started. Download releases on the homepage to see them here.
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort newest downloads first
+            dlHistory.reverse().forEach(dl => {
+                const item = document.createElement("div");
+                item.className = "dl-mgr-item";
+                
+                const time = new Date(dl.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+                item.innerHTML = `
+                    <div class="dl-mgr-info">
+                        <img src="${dl.poster || 'poster.png'}" class="dl-mgr-poster" onerror="this.src='poster.png'">
+                        <div>
+                            <div class="dl-mgr-title">${dl.title} (${dl.year})</div>
+                            <div class="dl-mgr-meta"><i class="fa-regular fa-clock"></i> Completed: ${time}</div>
+                        </div>
+                    </div>
+                    <span style="font-size: 0.72rem; color: var(--accent-green); font-weight: 700; background: rgba(52,199,89,0.1); border: 1px solid rgba(52,199,89,0.25); padding: 2px 8px; border-radius: 4px;">
+                        <i class="fa-solid fa-check"></i> Ready
+                    </span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Render Continue Watching Checklist
+        function renderChecklist() {
+            const list = document.getElementById("continue-watching-list");
+            list.innerHTML = "";
+            let watchlist = [];
+            try { watchlist = JSON.parse(safeStorage.getItem("continue_watching") || "[]"); } catch(e){}
+
+            if (watchlist.length === 0) {
+                // Seed basic empty checklist message
+                list.innerHTML = `
+                    <div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.82rem; font-style: italic;">
+                        No reminders added. Add movie episodes or clips you want to finish watching!
+                    </div>
+                `;
+                return;
+            }
+
+            watchlist.forEach((item, idx) => {
+                const row = document.createElement("div");
+                row.className = "continue-item";
+                row.innerHTML = `
+                    <label class="continue-check-wrap ${item.completed ? 'checked' : ''}">
+                        <input type="checkbox" ${item.completed ? 'checked' : ''} data-index="${idx}">
+                        <span>${item.title}</span>
+                    </label>
+                    <button class="continue-del-btn" data-index="${idx}"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                
+                // Toggle status listener
+                row.querySelector("input").addEventListener("change", (e) => {
+                    const idxToToggle = parseInt(e.target.getAttribute("data-index"));
+                    watchlist[idxToToggle].completed = e.target.checked;
+                    safeStorage.setItem("continue_watching", JSON.stringify(watchlist));
+                    renderChecklist();
+                });
+
+                // Delete item listener
+                row.querySelector(".continue-del-btn").addEventListener("click", () => {
+                    const idxToDel = parseInt(row.querySelector(".continue-del-btn").getAttribute("data-index"));
+                    watchlist.splice(idxToDel, 1);
+                    safeStorage.setItem("continue_watching", JSON.stringify(watchlist));
+                    renderChecklist();
+                });
+
+                list.appendChild(row);
+            });
+        }
+
+        // Add Checklist Item
+        document.getElementById("btn-add-continue").addEventListener("click", () => {
+            const val = document.getElementById("continue-add-input").value.trim();
+            if (!val) return;
+
+            let watchlist = [];
+            try { watchlist = JSON.parse(safeStorage.getItem("continue_watching") || "[]"); } catch(e){}
+
+            watchlist.push({ title: val, completed: false });
+            safeStorage.setItem("continue_watching", JSON.stringify(watchlist));
+            
+            document.getElementById("continue-add-input").value = "";
+            renderChecklist();
+        });
+
+        document.getElementById("continue-add-input").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                document.getElementById("btn-add-continue").click();
+            }
+        });
+
+        // Render Search History
+        function renderSearchHistory() {
+            const container = document.getElementById("search-history-tags-container");
+            container.innerHTML = "";
+            let searches = [];
+            try { searches = JSON.parse(safeStorage.getItem("recent_searches") || "[]"); } catch(e){}
+
+            if (searches.length === 0) {
+                container.innerHTML = `<span style="font-size:0.82rem; color:var(--text-muted); font-style:italic;">No recent searches</span>`;
+                return;
+            }
+
+            searches.forEach(term => {
+                const tag = document.createElement("span");
+                tag.className = "search-history-tag";
+                tag.innerHTML = `<i class="fa-solid fa-search" style="font-size:0.7rem; opacity:0.6;"></i> ${term}`;
+                container.appendChild(tag);
+            });
+        }
+
+        // Clear Search History
+        document.getElementById("btn-clear-searches").addEventListener("click", () => {
+            if (confirm("Are you sure you want to clear your search query logs?")) {
+                safeStorage.setItem("recent_searches", JSON.stringify([]));
+                renderSearchHistory();
+            }
+        });
+
+        // Edit Profile modal toggles
+        const overlay = document.getElementById("edit-overlay");
+        document.getElementById("btn-edit-trigger").addEventListener("click", () => {
+            // Prefill edit values
+            document.getElementById("edit-fullname").value = currentUser.name || "";
+            document.getElementById("edit-country").value = currentUser.country || "";
+            document.getElementById("edit-language").value = currentUser.preferredLanguage || "Tamil";
+            document.getElementById("edit-avatar").value = currentUser.avatar || "";
+            document.getElementById("edit-fav-director").value = currentUser.favDirector || "";
+            document.getElementById("edit-fav-actor").value = currentUser.favActor || "";
+            document.getElementById("edit-poster-bg").value = currentUser.favPosterBg || "";
+            document.getElementById("edit-genres").value = currentUser.genres || "";
+            document.getElementById("edit-bio").value = currentUser.bio || "";
+            
+            overlay.classList.add("open");
+        });
+
+        function closeEditModal() {
+            overlay.classList.remove("open");
+        }
+
+        document.getElementById("btn-edit-close").addEventListener("click", closeEditModal);
+        document.getElementById("btn-edit-cancel").addEventListener("click", closeEditModal);
+        overlay.addEventListener("click", (e) => {
+            if (e.target === overlay) closeEditModal();
+        });
+
+        // Save Profile Edits
+        document.getElementById("btn-edit-save").addEventListener("click", () => {
+            const name = document.getElementById("edit-fullname").value.trim();
+            if (!name) { alert("Display name cannot be empty."); return; }
+
+            const country = document.getElementById("edit-country").value.trim();
+            const language = document.getElementById("edit-language").value;
+            const avatar = document.getElementById("edit-avatar").value.trim();
+            const favDirector = document.getElementById("edit-fav-director").value.trim();
+            const favActor = document.getElementById("edit-fav-actor").value.trim();
+            const favPosterBg = document.getElementById("edit-poster-bg").value.trim();
+            const genres = document.getElementById("edit-genres").value.trim();
+            const bio = document.getElementById("edit-bio").value.trim();
+
+            // Save back to users list database
+            const users = JSON.parse(safeStorage.getItem("users_db") || "[]");
+            const idx = users.findIndex(u => u.username === currentUser.username);
+            if (idx !== -1) {
+                users[idx].name = name;
+                users[idx].country = country;
+                users[idx].preferredLanguage = language;
+                users[idx].avatar = avatar;
+                users[idx].favDirector = favDirector;
+                users[idx].favActor = favActor;
+                users[idx].favPosterBg = favPosterBg;
+                users[idx].genres = genres;
+                users[idx].bio = bio;
+                safeStorage.setItem("users_db", JSON.stringify(users));
+
+                // Sync to GDrive
+                if (window.GDriveSync && GDriveSync.isAuthorized) {
+                    GDriveSync.uploadFile("users_db.json", JSON.stringify(users)).catch(console.error);
+                }
+
+                // Save to current user session
+                safeSession.setItem("current_user", JSON.stringify(users[idx]));
+                safeStorage.setItem("current_user", JSON.stringify(users[idx]));
+            }
+
+            closeEditModal();
+            renderProfile();
+        });
+
+        // Log out handler
+        document.getElementById("btn-logout").addEventListener("click", () => {
+            if (confirm("Are you sure you want to sign out from Movie Time?")) {
+                safeSession.removeItem("current_user");
+                safeStorage.removeItem("current_user");
+                window.location.href = "index.html";
+            }
+        });
+
+        // Start render
+        renderProfile();
+    </script>
+
+</body>
+</html>

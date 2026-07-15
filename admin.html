@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Movie Time</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Link existing styling -->
+    <link rel="stylesheet" href="style.css?v=2">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 50%, #0d1224 0%, #030409 100%);
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient glowing backgrounds */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        body::before {
+            background: var(--accent-cyan);
+            top: 20%;
+            left: 20%;
+        }
+        body::after {
+            background: var(--accent-cyan);
+            bottom: 20%;
+            right: 20%;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            z-index: 10;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            animation: cardFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-logo-img {
+            height: 35px;
+            width: auto;
+        }
+
+        .login-logo-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+
+        .login-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 5px 0 0 0;
+        }
+
+        .btn-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: color 0.2s, transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .btn-back-home:hover {
+            color: var(--accent-cyan);
+            transform: translateX(-4px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card glass-panel">
+        <a href="index.html" class="btn-back-home"><i class="fa-solid fa-arrow-left"></i> Back to Catalog</a>
+        
+        <div class="login-header">
+            <a href="index.html" class="login-logo">
+                <img src="logo.jpg" alt="Movie Time Logo" class="login-logo-img">
+                <span class="login-logo-text">Movie Time</span>
+            </a>
+            <h2>Admin Publisher Portal</h2>
+            <p>Verification required to manage releases</p>
+        </div>
+
+        <form id="admin-login-form">
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label for="signin-username" style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem;">Username</label>
+                <input type="text" id="signin-username" required placeholder="Enter username" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-cyan)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            </div>
+            <div class="form-group" style="margin-bottom: 22px;">
+                <label for="signin-password" style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem;">Password</label>
+                <input type="password" id="signin-password" required placeholder="Enter password" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-cyan)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            </div>
+
+            <!-- Security Captcha Widget -->
+            <div class="captcha-wrapper" style="margin-bottom: 25px; padding: 14px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+                <label style="display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Security Verification</label>
+                <div class="captcha-container" style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                    <span class="captcha-code" id="signin-captcha-code-display" style="font-family: monospace; font-size: 1.4rem; font-weight: 800; color: var(--accent-cyan); background: rgba(10, 255, 235, 0.1); padding: 6px 18px; border-radius: 6px; letter-spacing: 4px; text-decoration: line-through; font-style: italic; user-select: none;">A98RT</span>
+                    <button type="button" class="btn-captcha-refresh" id="btn-signin-captcha-refresh" title="Refresh Captcha" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s;"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
+                <input type="text" id="signin-captcha-input" required placeholder="Enter captcha code above" style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-cyan)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-glowing w-full" style="width: 100%; justify-content: center; padding: 12px; font-weight: 700; font-size: 1rem; border-radius: 8px;">Log In as Admin</button>
+        </form>
+    </div>
+
+    <!-- Login Processing Logic -->
+    <script>
+        // Safe Storage Helper fallback
+        const safeStorage = {
+            _fallback: {},
+            getItem(key) {
+                try { return window.localStorage.getItem(key); } catch (e) { return this._fallback[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.localStorage.setItem(key, val); } catch (e) { this._fallback[key] = String(val); }
+            }
+        };
+
+        const safeSession = {
+            _fallback: {},
+            getItem(key) {
+                try { return window.sessionStorage.getItem(key); } catch (e) { return this._fallback[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.sessionStorage.setItem(key, val); } catch (e) { this._fallback[key] = String(val); }
+            }
+        };
+
+        // Initialize Users DB (Seed main admin ElamparithiS if not exists)
+        let users = [];
+        const storedUsers = safeStorage.getItem("users_db");
+        if (storedUsers) {
+            try {
+                users = JSON.parse(storedUsers) || [];
+            } catch (e) {
+                users = [];
+            }
+        }
+        
+        // Ensure admin user is seeded
+        let adminUser = users.find(u => u.username === "ElamparithiS");
+        if (!adminUser) {
+            adminUser = {
+                name: "Elamparithi S",
+                username: "ElamparithiS",
+                password: "Elampreethi0515@",
+                email: "smartelam12@gmail.com",
+                status: "approved",
+                role: "admin"
+            };
+            users.push(adminUser);
+            safeStorage.setItem("users_db", JSON.stringify(users));
+        }
+
+        // Generate Captcha
+        let currentCaptcha = "";
+        function generateCaptcha() {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            let code = "";
+            for (let i = 0; i < 5; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            currentCaptcha = code;
+            document.getElementById("signin-captcha-code-display").textContent = code;
+            document.getElementById("signin-captcha-input").value = "";
+        }
+
+        // Init Captcha on load
+        generateCaptcha();
+
+        // Refresh click animation & handler
+        const btnRefresh = document.getElementById("btn-signin-captcha-refresh");
+        btnRefresh.addEventListener("click", () => {
+            btnRefresh.style.transform = `rotate(${parseInt(btnRefresh.style.transform || 0) + 360}deg)`;
+            generateCaptcha();
+        });
+
+        // Submit listener
+        const loginForm = document.getElementById("admin-login-form");
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const username = document.getElementById("signin-username").value.trim();
+            const password = document.getElementById("signin-password").value.trim();
+            const captchaInput = document.getElementById("signin-captcha-input").value.trim().toUpperCase();
+
+            // Verify Captcha
+            if (captchaInput !== currentCaptcha) {
+                alert("Invalid security captcha code. Please try again.");
+                generateCaptcha();
+                return;
+            }
+
+            // Verify Admin Credentials
+            const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+            if (!user || user.password !== password) {
+                alert("Invalid username or password.");
+                generateCaptcha();
+                return;
+            }
+
+            if (user.role !== "admin") {
+                alert("Access Denied: Only administrative accounts can log in here.");
+                generateCaptcha();
+                return;
+            }
+
+            // Success
+            safeSession.setItem("current_user", JSON.stringify(user));
+            alert(`Welcome back, ${user.name}!`);
+            window.location.href = "index.html";
+        });
+    </script>
+</body>
+</html>
