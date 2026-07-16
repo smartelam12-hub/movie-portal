@@ -908,7 +908,7 @@
     </div>
 
     <!-- Dashboard Controller Logic -->
-    <script src="gdrive_v3.js"></script>
+    <script src="github_sync.js?v=1"></script>
     <script>
         const safeSession = {
             _fallback: {},
@@ -1053,19 +1053,14 @@
             // Render search history tags
             renderSearchHistory();
 
-            // GDrive status update
+            // GitHub sync status update
             const syncItem = document.getElementById("profile-sync-item");
             const syncVal = document.getElementById("profile-sync-val");
-            if (typeof GDriveSync !== "undefined") {
-                const state = GDriveSync.getStatus();
-                if (state.hasCredentials && state.isAuthorized) {
+            if (typeof GitHubSync !== "undefined") {
+                if (GitHubSync.hasToken) {
                     syncItem.style.display = "block";
                     syncVal.textContent = "Synced to Cloud";
                     syncVal.style.color = "var(--accent-green)";
-                } else if (state.hasCredentials) {
-                    syncItem.style.display = "block";
-                    syncVal.textContent = "Linked (Offline)";
-                    syncVal.style.color = "var(--accent-gold)";
                 } else {
                     syncItem.style.display = "none";
                 }
@@ -1264,12 +1259,7 @@
                 users[idx].bio = bio;
                 safeStorage.setItem("users_db", JSON.stringify(users));
 
-                // Sync to GDrive
-                if (window.GDriveSync && GDriveSync.isAuthorized) {
-                    GDriveSync.uploadFile("users_db.json", JSON.stringify(users)).catch(console.error);
-                }
-
-                // Save to current user session
+                // Sync users locally
                 safeSession.setItem("current_user", JSON.stringify(users[idx]));
                 safeStorage.setItem("current_user", JSON.stringify(users[idx]));
             }

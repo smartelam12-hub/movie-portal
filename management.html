@@ -449,6 +449,18 @@
                     <label class="em-lbl">Description / Synopsis</label>
                     <textarea class="em-inp" id="em-description"></textarea>
                 </div>
+
+                <!-- Download Links Section -->
+                <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 14px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <label class="em-lbl" style="margin-bottom: 0;"><i class="fa-solid fa-link" style="color: var(--accent-cyan); margin-right: 5px;"></i> Download Links</label>
+                        <button type="button" id="em-add-link" style="font-size: 0.72rem; padding: 4px 10px; background: rgba(0,240,255,0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 6px; cursor: pointer; font-family: inherit;"><i class="fa-solid fa-plus"></i> Add Row</button>
+                    </div>
+                    <div id="em-links-container">
+                        <!-- Link rows rendered dynamically -->
+                    </div>
+                    <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">Each row: Resolution, Codec, Audio, Size, Magnet Link, Direct Link</div>
+                </div>
             </div>
             <div class="em-foot">
                 <button class="btn-em-cancel" id="em-cancel">Cancel</button>
@@ -569,7 +581,7 @@
                         movies = movies.filter(m => m.id !== id);
                         safeStorage.setItem("movies_db", JSON.stringify(movies));
                         renderTable();
-                        triggerGDriveUpload(); // Sync deletions
+                        autoGitHubPush(); // Sync deletion to cloud
                     }
                 });
             });
@@ -607,8 +619,39 @@
             document.getElementById("em-banner").value = movie.banner || "";
             document.getElementById("em-trailer").value = movie.trailer || "";
             document.getElementById("em-description").value = movie.description || "";
+
+            // Render existing download links
+            const linksContainer = document.getElementById("em-links-container");
+            linksContainer.innerHTML = "";
+            const downloads = movie.downloads || [];
+            if (downloads.length === 0) {
+                addLinkRow(linksContainer, {});
+            } else {
+                downloads.forEach(dl => addLinkRow(linksContainer, dl));
+            }
+
             editOverlay.classList.add("open");
         }
+
+        function addLinkRow(container, dl) {
+            const row = document.createElement("div");
+            row.className = "dl-edit-row";
+            row.style.cssText = "display:grid;grid-template-columns:80px 70px 80px 70px 1fr 1fr 32px;gap:5px;margin-bottom:6px;align-items:center;";
+            row.innerHTML = `
+                <input type="text" class="em-inp em-dl-res" placeholder="1080p" value="${dl.resolution||''}" style="padding:5px 8px;font-size:0.73rem;">
+                <input type="text" class="em-inp em-dl-codec" placeholder="x264" value="${dl.codec||''}" style="padding:5px 8px;font-size:0.73rem;">
+                <input type="text" class="em-inp em-dl-audio" placeholder="Tamil" value="${dl.audio||''}" style="padding:5px 8px;font-size:0.73rem;">
+                <input type="text" class="em-inp em-dl-size" placeholder="1.4 GB" value="${dl.size||''}" style="padding:5px 8px;font-size:0.73rem;">
+                <input type="text" class="em-inp em-dl-link" placeholder="magnet:?xt=..." value="${dl.link||''}" style="padding:5px 8px;font-size:0.73rem;">
+                <input type="text" class="em-inp em-dl-direct" placeholder="https://..." value="${dl.directLink||''}" style="padding:5px 8px;font-size:0.73rem;">
+                <button type="button" onclick="this.closest('.dl-edit-row').remove()" style="padding:5px;background:rgba(255,74,96,0.12);border:1px solid rgba(255,74,96,0.3);color:#ff4a60;border-radius:6px;cursor:pointer;font-size:0.75rem;"><i class="fa-solid fa-trash-can"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        document.getElementById("em-add-link").addEventListener("click", () => {
+            addLinkRow(document.getElementById("em-links-container"), {});
+        });
 
         function closeEditModal() {
             editOverlay.classList.remove("open");
@@ -644,14 +687,45 @@
             movies[idx].trailer = document.getElementById("em-trailer").value.trim();
             movies[idx].description = document.getElementById("em-description").value.trim();
 
+            // Save download links from edit rows
+            const dlRows = document.querySelectorAll(".dl-edit-row");
+            const newDls = [];
+            dlRows.forEach(row => {
+                const res    = row.querySelector(".em-dl-res").value.trim();
+                const codec  = row.querySelector(".em-dl-codec").value.trim();
+                const audio  = row.querySelector(".em-dl-audio").value.trim();
+                const size   = row.querySelector(".em-dl-size").value.trim();
+                const link   = row.querySelector(".em-dl-link").value.trim();
+                const direct = row.querySelector(".em-dl-direct").value.trim();
+                if (res || link || direct) newDls.push({ resolution: res, codec, audio, size, link, directLink: direct });
+            });
+            movies[idx].downloads = newDls;
+
             safeStorage.setItem("movies_db", JSON.stringify(movies));
             closeEditModal();
             renderTable();
             autoGitHubPush(); // Auto-push every edit to cloud
         });
 
-        // Initialize Table
-        renderTable();
+        // Initialize Table — also pull from GitHub so newly uploaded movies appear
+        async function initManagement() {
+            renderTable(); // Show local data immediately
+            if (typeof GitHubSync !== "undefined" && GitHubSync.rawUrl) {
+                try {
+                    const cloudMovies = await GitHubSync.loadMovies();
+                    if (cloudMovies && cloudMovies.length > 0) {
+                        // Merge: keep whichever has more entries
+                        let localMovies = [];
+                        try { localMovies = JSON.parse(safeStorage.getItem("movies_db") || "[]"); } catch(_) {}
+                        if (cloudMovies.length >= localMovies.length) {
+                            safeStorage.setItem("movies_db", JSON.stringify(cloudMovies));
+                            renderTable(); // Re-render with cloud data
+                        }
+                    }
+                } catch(e) { console.warn("[Management] GitHub sync failed:", e.message); }
+            }
+        }
+        initManagement();
 
         // Clear Catalog Handler
         const btnClear = document.getElementById("btn-clear-catalog");

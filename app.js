@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Apply Sorting
         if (activeSort === "latest") {
             // Sort by Year descending (newest first)
-            filtered.sort((a, b) => b.year - a.year || b.id.localeCompare(a.id));
+            filtered.sort((a, b) => b.year - a.year || String(b.id).localeCompare(String(a.id)));
         } else if (activeSort === "rating") {
             filtered.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
         } else if (activeSort === "title") {
