@@ -1321,20 +1321,20 @@ document.addEventListener("DOMContentLoaded", () => {
             let localMovies = [];
             try { localMovies = JSON.parse(safeStorage.getItem("movies_db") || "[]"); } catch(_) {}
 
-            // Merge: use whichever has MORE movies to avoid overwriting new uploads
-            // that haven't reached GitHub yet
-            if (cloudMovies.length >= localMovies.length && cloudMovies.length > 0) {
+            const isLocalDefault = localMovies.length === 16 && localMovies.some(m => m.id === 1);
+            const isAdmin = typeof GitHubSync !== "undefined" && GitHubSync.hasToken;
+
+            // Overwrite if visitor, or local database is mock seed, or cloud has more/same movies
+            if (!isAdmin || isLocalDefault || (cloudMovies.length >= localMovies.length && cloudMovies.length > 0)) {
                 safeStorage.setItem("movies_db", JSON.stringify(cloudMovies));
                 movies.length = 0;
                 movies.push(...cloudMovies);
                 renderCatalog();
                 console.log("[GitHub] Catalog loaded from cloud — " + cloudMovies.length + " movies.");
-            } else if (localMovies.length > cloudMovies.length) {
+            } else if (isAdmin && localMovies.length > cloudMovies.length) {
                 // Local has more — keep local, push it to cloud to sync
                 console.log("[GitHub] Local has more movies (" + localMovies.length + " vs " + cloudMovies.length + "). Keeping local.");
-                if (typeof GitHubSync !== "undefined" && GitHubSync.hasToken) {
-                    GitHubSync.saveMovies(localMovies).catch(e => console.warn("[GitHub] Auto-push failed:", e.message));
-                }
+                GitHubSync.saveMovies(localMovies).catch(e => console.warn("[GitHub] Auto-push failed:", e.message));
             }
         } catch(e) {
             console.warn("[GitHub] Could not load cloud catalog:", e.message);

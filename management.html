@@ -551,6 +551,10 @@
             if (stored) {
                 try {
                     movies = JSON.parse(stored) || [];
+                    if (movies.length === 16 && movies.some(m => m.id === 1)) {
+                        movies = [];
+                        safeStorage.setItem("movies_db", JSON.stringify([]));
+                    }
                 } catch(e) {
                     movies = [];
                 }
@@ -757,10 +761,14 @@
                 try {
                     const cloudMovies = await GitHubSync.loadMovies();
                     if (cloudMovies && cloudMovies.length > 0) {
-                        // Merge: keep whichever has more entries
+                        // Merge: keep whichever has more entries unless local is the mock seed
                         let localMovies = [];
                         try { localMovies = JSON.parse(safeStorage.getItem("movies_db") || "[]"); } catch(_) {}
-                        if (cloudMovies.length >= localMovies.length) {
+                        
+                        const isLocalDefault = localMovies.length === 16 && localMovies.some(m => m.id === 1);
+                        const isAdmin = typeof GitHubSync !== "undefined" && GitHubSync.hasToken;
+
+                        if (!isAdmin || isLocalDefault || (cloudMovies.length >= localMovies.length)) {
                             safeStorage.setItem("movies_db", JSON.stringify(cloudMovies));
                             renderTable(); // Re-render with cloud data
                         }
