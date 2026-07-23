@@ -684,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span><i class="fa-solid fa-calendar"></i> ${featured.year}</span>
                     <span><i class="fa-solid fa-clock"></i> ${featured.duration}</span>
                     <span><i class="fa-solid fa-video"></i> ${featured.quality}</span>
-                    <span><i class="fa-solid fa-volume-high"></i> ${featured.audio}</span>
+                    <span><i class="fa-solid fa-volume-high"></i> ${featured.audio || featured.languages.join(" + ")}</span>
                 </p>
                 <p class="hero-description">${featured.description}</p>
                 <div class="hero-ctas">
