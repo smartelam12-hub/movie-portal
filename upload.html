@@ -288,7 +288,7 @@
     </div>
 </div>
 
-<script src="github_sync.js?v=1"></script>
+<script src="github_sync.js?v=10"></script>
 <script>
 const safeStorage={_f:{},getItem(k){try{return localStorage.getItem(k);}catch(e){return this._f[k]||null;}},setItem(k,v){try{localStorage.setItem(k,v);}catch(e){this._f[k]=String(v);}}},safeSession={_f:{},getItem(k){try{return sessionStorage.getItem(k);}catch(e){return this._f[k]||null;}},setItem(k,v){try{sessionStorage.setItem(k,v);}catch(e){this._f[k]=String(v);}}};
 let currentUser=null;try{currentUser=JSON.parse(safeSession.getItem('current_user')||safeStorage.getItem('current_user'));}catch(e){}
