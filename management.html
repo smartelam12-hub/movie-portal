@@ -618,6 +618,7 @@
                     if (confirm(`Are you sure you want to permanently delete the release "${targetMovie.title} (${targetMovie.year})"?`)) {
                         movies = movies.filter(m => m.id !== id);
                         safeStorage.setItem("movies_db", JSON.stringify(movies));
+                        safeStorage.setItem("gh_just_uploaded", Date.now().toString());
                         renderTable();
                         autoGitHubPush(); // Sync deletion to cloud
                     }
@@ -750,6 +751,7 @@
             movies[idx].downloads = newDls;
 
             safeStorage.setItem("movies_db", JSON.stringify(movies));
+            safeStorage.setItem("gh_just_uploaded", Date.now().toString());
             closeEditModal();
             renderTable();
             autoGitHubPush(); // Auto-push every edit to cloud
@@ -758,6 +760,14 @@
         // Initialize Table — also pull from GitHub so newly uploaded movies appear
         async function initManagement() {
             renderTable(); // Show local data immediately
+            
+            // Skip cloud overwrite if there was a fresh change within 2 minutes
+            const justUploaded = safeStorage.getItem("gh_just_uploaded");
+            if (justUploaded && (Date.now() - parseInt(justUploaded) < 120000)) {
+                console.log("[Management] Skipping cloud overwrite — fresh change detected within 2 mins.");
+                return;
+            }
+
             if (typeof GitHubSync !== "undefined" && GitHubSync.rawUrl) {
                 try {
                     const cloudMovies = await GitHubSync.loadMovies();
@@ -785,6 +795,7 @@
             if (confirm("WARNING: You are about to clear all custom movies from the database catalog. This action is irreversible. Proceed?")) {
                 if (confirm("Confirming a second time: Are you absolutely sure you want to delete all entries?")) {
                     safeStorage.setItem("movies_db", JSON.stringify([]));
+                    safeStorage.setItem("gh_just_uploaded", Date.now().toString());
                     renderTable();
                     autoGitHubPush(); // Sync wiping to GitHub
                     showNotification("Catalog Reset", "Catalog database wiped successfully. Refresh the homepage to see changes.", true);

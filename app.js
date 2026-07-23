@@ -668,7 +668,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const featured = movies[0]; // Featured is the latest/newly updated movie
+        // Featured is the latest release (newest year and ID/timestamp first)
+        const featured = [...movies].sort((a, b) => b.year - a.year || String(b.id).localeCompare(String(a.id)))[0];
         heroBanner.style.display = "flex";
         
         heroBanner.innerHTML = `
@@ -1304,12 +1305,11 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadFromGitHub() {
         if (typeof GitHubSync === "undefined") return;
 
-        // If admin just uploaded a movie, skip overwrite for this session
-        // so the newly uploaded movie shows immediately
+        // If admin just uploaded a movie, skip overwrite for 2 minutes
+        // so the newly uploaded movie shows immediately and CDN cache can catch up
         const justUploaded = safeStorage.getItem("gh_just_uploaded");
-        if (justUploaded) {
-            safeStorage.removeItem("gh_just_uploaded");
-            console.log("[GitHub] Skipping cloud overwrite — fresh local upload detected.");
+        if (justUploaded && (Date.now() - parseInt(justUploaded) < 120000)) {
+            console.log("[GitHub] Skipping cloud overwrite — fresh local upload/change detected within 2 mins.");
             return;
         }
 
