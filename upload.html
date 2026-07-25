@@ -354,10 +354,10 @@ let banner=document.getElementById('f-banner').value.trim();
 let poster=pimg.src&&!pimg.src.endsWith('upload.html')?pimg.src:purl.value.trim();
 
 if (banner.startsWith("data:image/")) {
-    banner = await compressImage(banner, 800, 450, 0.7);
+    banner = await compressImage(banner, 600, 340, 0.5);
 }
 if (poster.startsWith("data:image/")) {
-    poster = await compressImage(poster, 300, 450, 0.7);
+    poster = await compressImage(poster, 220, 330, 0.5);
 }
 let ok=true;
 if(!title){document.getElementById('f-title').classList.add('inv');document.getElementById('e-title').style.display='block';ok=false;}

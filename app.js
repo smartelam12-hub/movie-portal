@@ -709,7 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const playBtn = e.target.closest("#btn-hero-play");
         
         if (movies.length === 0) return;
-        const latestMovie = movies[0]; // Featured is the latest/newly updated movie
+        const latestMovie = [...movies].sort((a, b) => b.year - a.year || String(b.id).localeCompare(String(a.id)))[0];
         
         if (downloadBtn) {
             openMovieDetails(latestMovie);

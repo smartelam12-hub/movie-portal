@@ -340,6 +340,13 @@
                     </div>
                 </div>
 
+                <!-- Database Optimization Panel -->
+                <div class="action-card glass-panel" style="border: 1px solid rgba(255, 179, 0, 0.2); background: rgba(255, 179, 0, 0.02); margin-bottom: 20px;">
+                    <h3 style="color: #ffb300;"><i class="fa-solid fa-wand-magic-sparkles"></i> Database Optimization</h3>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">Compress large base64 image data to free up Local Storage space, allowing you to store 150+ movies easily.</p>
+                    <button type="button" class="btn" id="btn-optimize-db" style="width: 100%; justify-content: center; font-size: 0.85rem; padding: 10px 14px; font-weight: 700; background: rgba(255,179,0,0.12); border: 1px solid #ffb300; color: #ffb300;"><i class="fa-solid fa-compress"></i> Optimize & Compress Images</button>
+                </div>
+
                 <div class="action-card glass-panel" style="border: 1px solid rgba(255, 74, 96, 0.15); background: rgba(255, 74, 96, 0.02);">
                     <h3 style="color: #ff4a60;"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
                     <p>Permanently wipe the entire movies catalog and reload the default catalog dataset seed.</p>
@@ -715,10 +722,10 @@
             let banner = document.getElementById("em-banner").value.trim() || poster;
 
             if (poster.startsWith("data:image/")) {
-                poster = await compressImage(poster, 300, 450, 0.7);
+                poster = await compressImage(poster, 220, 330, 0.5);
             }
             if (banner.startsWith("data:image/")) {
-                banner = await compressImage(banner, 800, 450, 0.7);
+                banner = await compressImage(banner, 600, 340, 0.5);
             }
 
             movies[idx].title = title;
@@ -800,6 +807,55 @@
                     autoGitHubPush(); // Sync wiping to GitHub
                     showNotification("Catalog Reset", "Catalog database wiped successfully. Refresh the homepage to see changes.", true);
                 }
+            }
+        });
+
+        // Optimize Database Click Handler
+        document.getElementById("btn-optimize-db").addEventListener("click", async () => {
+            const btn = document.getElementById("btn-optimize-db");
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Optimizing Images...';
+            
+            try {
+                loadMovies();
+                if (movies.length === 0) {
+                    showNotification("Optimization", "Database is empty. Nothing to optimize.", false);
+                    return;
+                }
+                
+                let optimizedCount = 0;
+                for (let i = 0; i < movies.length; i++) {
+                    const m = movies[i];
+                    let changed = false;
+                    
+                    if (m.poster && m.poster.startsWith("data:image/")) {
+                        const beforeSize = m.poster.length;
+                        m.poster = await compressImage(m.poster, 220, 330, 0.5);
+                        if (m.poster.length < beforeSize) changed = true;
+                    }
+                    if (m.banner && m.banner.startsWith("data:image/")) {
+                        const beforeSize = m.banner.length;
+                        m.banner = await compressImage(m.banner, 600, 340, 0.5);
+                        if (m.banner.length < beforeSize) changed = true;
+                    }
+                    if (changed) optimizedCount++;
+                }
+                
+                if (optimizedCount > 0) {
+                    safeStorage.setItem("movies_db", JSON.stringify(movies));
+                    safeStorage.setItem("gh_just_uploaded", Date.now().toString());
+                    renderTable();
+                    await autoGitHubPush();
+                    showNotification("Optimization Success", `Optimized and compressed images for ${optimizedCount} movies! Local Storage space is now freed up.`, true);
+                } else {
+                    showNotification("Optimization", "All images are already optimized!", true);
+                }
+            } catch (e) {
+                showNotification("Optimization Failed", e.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         });
 
