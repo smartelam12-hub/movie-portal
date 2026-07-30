@@ -239,9 +239,14 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (movie.type === "PreDVD") badgeClass = "badge-predvd-card";
             else if (movie.type === "HDTS") badgeClass = "badge-hdts-card";
 
+            // Use poster if available, else show a gradient placeholder
+            const posterHtml = (movie.poster && movie.poster.trim())
+                ? `<img src="${movie.poster}" alt="${movie.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">`
+                : `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1b2a,#1a2a3a);color:var(--text-muted);"><i class="fa-solid fa-film" style="font-size:2.5rem;margin-bottom:8px;"></i><span style="font-size:0.7rem;">${movie.title}</span></div>`;
+
             card.innerHTML = `
                 <div class="movie-poster-box">
-                    <img src="${movie.poster}" alt="${movie.title}" loading="lazy">
+                    ${posterHtml}
                     <div class="card-badges">
                         <span class="card-badge ${badgeClass}">${movie.type}</span>
                     </div>
@@ -256,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h3 class="movie-card-title">${movie.title} (${movie.year})</h3>
                     <div class="movie-card-meta">
                         <span class="card-meta-lang">${movie.languages.join(" + ")}</span>
-                        <span>${movie.downloads[0] ? movie.downloads[0].resolution : "HD"}</span>
+                        <span>${(movie.downloads && movie.downloads[0]) ? movie.downloads[0].resolution : (movie.episodes && movie.episodes.length ? movie.episodes.length + ' Episodes' : 'HD')}</span>
                     </div>
                 </div>
             `;
@@ -858,8 +863,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const featured = [...movies].sort((a, b) => b.year - a.year || String(b.id).localeCompare(String(a.id)))[0];
         heroBanner.style.display = "flex";
         
+        // Use backdrop if available, fall back to poster image, then a pure gradient
+        const bgImage = (featured.backdrop && featured.backdrop.trim())
+            ? featured.backdrop
+            : (featured.poster && featured.poster.trim() ? featured.poster : "");
+        const backdropStyle = bgImage
+            ? `background-image: linear-gradient(to right, rgba(10, 15, 29, 0.97) 30%, rgba(10, 15, 29, 0.55) 70%, rgba(10, 15, 29, 0.97) 100%), url('${bgImage}'); background-size: cover; background-position: center top;`
+            : `background: linear-gradient(135deg, #0a0f1d 0%, #0d1b2a 40%, #0a1628 100%);`;
+
         heroBanner.innerHTML = `
-            <div class="hero-backdrop" style="background-image: linear-gradient(to right, rgba(10, 15, 29, 0.95) 30%, rgba(10, 15, 29, 0.4) 70%, rgba(10, 15, 29, 0.95) 100%), url('${featured.backdrop}');"></div>
+            <div class="hero-backdrop" style="${backdropStyle}"></div>
             <div class="hero-content">
                 <div class="movie-badges">
                     <span class="badge badge-featured"><i class="fa-solid fa-star"></i> Latest Release</span>
