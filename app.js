@@ -427,21 +427,36 @@ document.addEventListener("DOMContentLoaded", () => {
             playerStartOverlay.innerHTML = `
                 <i class="fa-solid fa-circle-play" style="font-size: 3rem; color: var(--accent-cyan);"></i>
                 <span style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 10px;">Play Trailer</span>
-                <small style="font-size:0.75rem;color:rgba(255,255,255,.5);margin-top:4px;">${streamLabel}</small>
-            `;
-            if (isMagnet === "false" && isYouTube === "false") {
-                onlineVideo.innerHTML = `<source src="${streamSrc}" type="video/mp4">Your browser does not support HTML5 video.`;
-                onlineVideo.load();
+        const isSeries = movie.category === "series";
+
+        // Set player overlay state (for movies, standard logic)
+        if (!isSeries) {
+            playerStartOverlay.dataset.isMagnet = isMagnet;
+            playerStartOverlay.dataset.isYouTube = isYouTube;
+            playerStartOverlay.dataset.youtubeId = youtubeId;
+            playerStartOverlay.dataset.streamSrc = streamSrc;
+
+            if (streamSrc) {
+                playerStartOverlay.dataset.canPlay = "true";
+                playerStartOverlay.innerHTML = `
+                    <i class="fa-solid fa-circle-play" style="font-size: 3rem; color: var(--accent-cyan);"></i>
+                    <span style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 10px;">Play Trailer</span>
+                    <small style="font-size:0.75rem;color:rgba(255,255,255,.5);margin-top:4px;">${streamLabel}</small>
+                `;
+                if (isMagnet === "false" && isYouTube === "false") {
+                    onlineVideo.innerHTML = `<source src="${streamSrc}" type="video/mp4">Your browser does not support HTML5 video.`;
+                    onlineVideo.load();
+                } else {
+                    onlineVideo.innerHTML = "";
+                }
             } else {
-                onlineVideo.innerHTML = "";
+                playerStartOverlay.dataset.canPlay = "false";
+                playerStartOverlay.innerHTML = `
+                    <i class="fa-solid fa-circle-exclamation" style="font-size: 2.5rem; color:#f59e0b;"></i>
+                    <span style="font-size:0.9rem; margin-top: 8px;">No trailer/stream source available</span>
+                    <small style="font-size:0.7rem;color:rgba(255,255,255,.4);margin-top:4px;">Provide a Trailer Link or Download Link to play</small>
+                `;
             }
-        } else {
-            playerStartOverlay.dataset.canPlay = "false";
-            playerStartOverlay.innerHTML = `
-                <i class="fa-solid fa-circle-exclamation" style="font-size: 2.5rem; color:#f59e0b;"></i>
-                <span style="font-size:0.9rem; margin-top: 8px;">No trailer/stream source available</span>
-                <small style="font-size:0.7rem;color:rgba(255,255,255,.4);margin-top:4px;">Provide a Trailer Link or Download Link to play</small>
-            `;
         }
 
         // Backdrop & Poster
@@ -455,8 +470,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("modal-duration").innerHTML = `<i class="fa-solid fa-clock"></i> ${movie.duration}`;
         document.getElementById("modal-rating").innerHTML = `<i class="fa-solid fa-star"></i> ${movie.rating}`;
 
-        // Watchlist Bookmark logic removed
-        
         // Dynamic info grid
         document.getElementById("modal-genre").textContent = movie.genre;
         document.getElementById("modal-director").textContent = movie.director;
@@ -485,30 +498,220 @@ document.addEventListener("DOMContentLoaded", () => {
         qualBadge.textContent = movie.quality;
         badgeContainer.appendChild(qualBadge);
 
-        // Render download rows
+        // Category Badge
+        let catBadge = document.createElement("span");
+        catBadge.classList.add("badge");
+        catBadge.style.cssText = isSeries ? "background: rgba(255, 179, 0, 0.15); border: 1px solid #ffb300; color: #ffb300;" : "background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan);";
+        catBadge.innerHTML = isSeries ? `<i class="fa-solid fa-rectangle-list"></i> Series` : `<i class="fa-solid fa-film"></i> Movie`;
+        badgeContainer.appendChild(catBadge);
+
+        // Render download rows / Series Episodes
         const dlList = document.getElementById("modal-downloads-list");
+        const seriesSelector = document.getElementById("modal-series-selector");
         dlList.innerHTML = "";
 
-        if (movie.downloads.length === 0) {
-            dlList.innerHTML = `<tr><td colspan="5" style="text-align:center;">No downloads available for this release.</td></tr>`;
-        } else {
-            movie.downloads.forEach(dl => {
-                const tr = document.createElement("tr");
-                const hasMagnet = dl.link && dl.link.trim();
-                const hasDirect = dl.directLink && dl.directLink.trim();
-                tr.innerHTML = `
-                    <td><strong>${dl.resolution}</strong></td>
-                    <td><span class="type-pill">${dl.codec}</span></td>
-                    <td><span class="type-pill">${dl.audio || movie.audio || "—"}</span></td>
-                    <td><strong>${dl.size}</strong></td>
-                    <td style="white-space: nowrap;">
-                        ${hasMagnet ? `<button class="dl-btn" data-link="${dl.link}" style="margin-right: 6px;"><i class="fa-solid fa-magnet"></i> Magnet</button>` : ""}
-                        ${hasDirect ? `<button class="direct-dl-btn" data-link="${dl.directLink}" style="background: rgba(10,255,235,0.12); color: var(--accent-cyan); border: 1px solid rgba(10,255,235,0.3); padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.2s;"><i class="fa-solid fa-download"></i> Direct</button>` : ""}
-                        ${hasMagnet ? `<button class="copy-btn" data-link="${dl.link}" style="margin-left: 4px;"><i class="fa-solid fa-link"></i></button>` : ""}
-                    </td>
-                `;
-                dlList.appendChild(tr);
+        if (isSeries) {
+            seriesSelector.style.display = "block";
+            const seasonSelect = document.getElementById("modal-season-select");
+            const episodesList = document.getElementById("modal-episodes-list");
+            seasonSelect.innerHTML = "";
+            episodesList.innerHTML = "";
+
+            const episodes = movie.episodes || [];
+            
+            // Find unique seasons
+            const seasons = [...new Set(episodes.map(ep => ep.season))].sort((a, b) => a - b);
+            seasons.forEach(s => {
+                const option = document.createElement("option");
+                option.value = s;
+                option.textContent = `Season ${s}`;
+                seasonSelect.appendChild(option);
             });
+
+            // Function to render episodes for selected season
+            function renderEpisodesForSeason(seasonNum) {
+                episodesList.innerHTML = "";
+                const filtered = episodes.filter(ep => ep.season === parseInt(seasonNum)).sort((a, b) => a.episode - b.episode);
+                
+                filtered.forEach((ep, i) => {
+                    const div = document.createElement("div");
+                    div.className = "episode-list-item";
+                    div.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; cursor: pointer; transition: background 0.2s, border 0.2s;";
+                    
+                    div.innerHTML = `
+                        <div>
+                            <strong style="color: #fff; font-size: 0.85rem;">Ep ${ep.episode}: ${ep.title || 'Episode ' + ep.episode}</strong>
+                        </div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">
+                            <i class="fa-solid fa-cloud-arrow-down" style="color: var(--accent-cyan);"></i> Links
+                        </div>
+                    `;
+                    
+                    div.addEventListener("click", () => {
+                        // Highlight active episode
+                        episodesList.querySelectorAll(".episode-list-item").forEach(el => {
+                            el.style.background = "rgba(255,255,255,0.03)";
+                            el.style.borderColor = "rgba(255,255,255,0.06)";
+                        });
+                        div.style.background = "rgba(0, 240, 255, 0.08)";
+                        div.style.borderColor = "var(--accent-cyan)";
+                        
+                        // Show downloads for this episode
+                        renderEpisodeDownloads(ep);
+                        
+                        // Setup player for this episode
+                        setupPlayerForEpisode(ep);
+                    });
+                    
+                    episodesList.appendChild(div);
+                    
+                    // Auto-select first episode
+                    if (i === 0) {
+                        div.click();
+                    }
+                });
+            }
+
+            function renderEpisodeDownloads(ep) {
+                dlList.innerHTML = "";
+                const downloads = ep.downloads || [];
+                if (downloads.length === 0) {
+                    dlList.innerHTML = `<tr><td colspan="5" style="text-align:center;">No downloads available for this episode.</td></tr>`;
+                } else {
+                    downloads.forEach(dl => {
+                        const tr = document.createElement("tr");
+                        const hasMagnet = dl.link && dl.link.trim();
+                        const hasDirect = dl.directLink && dl.directLink.trim();
+                        tr.innerHTML = `
+                            <td><strong>${dl.resolution}</strong></td>
+                            <td><span class="type-pill">${dl.codec}</span></td>
+                            <td><span class="type-pill">${dl.audio || movie.languages.join(" + ")}</span></td>
+                            <td><strong>${dl.size}</strong></td>
+                            <td style="white-space: nowrap;">
+                                ${hasMagnet ? `<button class="dl-btn" data-link="${dl.link}" style="margin-right: 6px;"><i class="fa-solid fa-magnet"></i> Magnet</button>` : ""}
+                                ${hasDirect ? `<button class="direct-dl-btn" data-link="${dl.directLink}" style="background: rgba(10,255,235,0.12); color: var(--accent-cyan); border: 1px solid rgba(10,255,235,0.3); padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.2s;"><i class="fa-solid fa-download"></i> Direct</button>` : ""}
+                                ${hasMagnet ? `<button class="copy-btn" data-link="${dl.link}" style="margin-left: 4px;"><i class="fa-solid fa-link"></i></button>` : ""}
+                            </td>
+                        `;
+                        dlList.appendChild(tr);
+                    });
+                }
+            }
+
+            function setupPlayerForEpisode(ep) {
+                let epStreamSrc = "";
+                let epStreamLabel = "";
+                let epIsMagnet = "false";
+                let epIsYouTube = "false";
+                let epYoutubeId = "";
+                
+                // 1. Check direct link
+                const resOrder = ["2160p", "4k", "1080p", "720p", "480p", "360p"];
+                let best = null;
+                let bestScore = 999;
+                const downloads = ep.downloads || [];
+                downloads.forEach(dl => {
+                    if (dl.directLink && dl.directLink.trim() && dl.directLink.trim().startsWith("http")) {
+                        const res = (dl.resolution || "").toLowerCase();
+                        let score = resOrder.findIndex(r => res.includes(r));
+                        if (score === -1) score = 50;
+                        if (!best || score < bestScore) {
+                            best = dl;
+                            bestScore = score;
+                        }
+                    }
+                });
+                
+                if (best) {
+                    epStreamSrc = best.directLink.trim();
+                    epStreamLabel = `Episode Stream (${best.resolution || "HD"})`;
+                } else {
+                    // Fallback to magnet
+                    const magnetRow = downloads.find(dl => dl.link && dl.link.trim().startsWith("magnet:"));
+                    if (magnetRow) {
+                        epStreamSrc = magnetRow.link.trim();
+                        epStreamLabel = `Torrent Episode Stream (${magnetRow.resolution || "HD"})`;
+                        epIsMagnet = "true";
+                    }
+                }
+                
+                // If no stream link, check YouTube trailer
+                if (!epStreamSrc && movie.trailer && movie.trailer.trim()) {
+                    const t = movie.trailer.trim();
+                    const ytId = getYouTubeId(t);
+                    if (ytId) {
+                        epIsYouTube = "true";
+                        epYoutubeId = ytId;
+                        epStreamSrc = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+                        epStreamLabel = "Official Trailer (YouTube)";
+                    } else if (t.includes("http") || t.includes(".mp4") || t.includes(".webm") || t.includes(".mkv")) {
+                        epStreamSrc = t;
+                        epStreamLabel = "Official Trailer";
+                    }
+                }
+                
+                playerStartOverlay.dataset.isMagnet = epIsMagnet;
+                playerStartOverlay.dataset.isYouTube = epIsYouTube;
+                playerStartOverlay.dataset.youtubeId = epYoutubeId;
+                playerStartOverlay.dataset.streamSrc = epStreamSrc;
+                
+                if (epStreamSrc) {
+                    playerStartOverlay.dataset.canPlay = "true";
+                    playerStartOverlay.innerHTML = `
+                        <i class="fa-solid fa-circle-play" style="font-size: 3rem; color: var(--accent-cyan);"></i>
+                        <span style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 10px;">Play Episode</span>
+                        <small style="font-size:0.75rem;color:rgba(255,255,255,.5);margin-top:4px;">${epStreamLabel}</small>
+                    `;
+                    if (epIsMagnet === "false" && epIsYouTube === "false") {
+                        onlineVideo.innerHTML = `<source src="${epStreamSrc}" type="video/mp4">Your browser does not support HTML5 video.`;
+                        onlineVideo.load();
+                    } else {
+                        onlineVideo.innerHTML = "";
+                    }
+                } else {
+                    playerStartOverlay.dataset.canPlay = "false";
+                    playerStartOverlay.innerHTML = `
+                        <i class="fa-solid fa-circle-exclamation" style="font-size: 2.5rem; color:#f59e0b;"></i>
+                        <span style="font-size:0.9rem; margin-top: 8px;">No stream source available</span>
+                        <small style="font-size:0.7rem;color:rgba(255,255,255,.4);margin-top:4px;">Provide an Episode Stream Link or Torrent to play</small>
+                    `;
+                }
+            }
+
+            seasonSelect.addEventListener("change", () => {
+                renderEpisodesForSeason(seasonSelect.value);
+            });
+            
+            if (seasons.length > 0) {
+                renderEpisodesForSeason(seasons[0]);
+            } else {
+                episodesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding: 10px;">No episodes uploaded yet.</div>`;
+                dlList.innerHTML = `<tr><td colspan="5" style="text-align:center;">No downloads available for this series.</td></tr>`;
+            }
+        } else {
+            seriesSelector.style.display = "none";
+            const downloads = movie.downloads || [];
+            if (downloads.length === 0) {
+                dlList.innerHTML = `<tr><td colspan="5" style="text-align:center;">No downloads available for this release.</td></tr>`;
+            } else {
+                downloads.forEach(dl => {
+                    const tr = document.createElement("tr");
+                    const hasMagnet = dl.link && dl.link.trim();
+                    const hasDirect = dl.directLink && dl.directLink.trim();
+                    tr.innerHTML = `
+                        <td><strong>${dl.resolution}</strong></td>
+                        <td><span class="type-pill">${dl.codec}</span></td>
+                        <td><span class="type-pill">${dl.audio || movie.audio || "—"}</span></td>
+                        <td><strong>${dl.size}</strong></td>
+                        <td style="white-space: nowrap;">
+                            ${hasMagnet ? `<button class="dl-btn" data-link="${dl.link}" style="margin-right: 6px;"><i class="fa-solid fa-magnet"></i> Magnet</button>` : ""}
+                            ${hasDirect ? `<button class="direct-dl-btn" data-link="${dl.directLink}" style="background: rgba(10,255,235,0.12); color: var(--accent-cyan); border: 1px solid rgba(10,255,235,0.3); padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.2s;"><i class="fa-solid fa-download"></i> Direct</button>` : ""}
+                            ${hasMagnet ? `<button class="copy-btn" data-link="${dl.link}" style="margin-left: 4px;"><i class="fa-solid fa-link"></i></button>` : ""}
+                        </td>
+                    `;
+                    dlList.appendChild(tr);
+                });
+            }
         }
 
         // Select "Downloads" tab by default

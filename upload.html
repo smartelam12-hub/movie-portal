@@ -141,6 +141,16 @@
 
             <div class="frow">
                 <div class="ffield">
+                    <label class="flbl" for="f-category"><i class="fa-solid fa-layer-group"></i> Release Category <span class="req">*</span></label>
+                    <select id="f-category" class="finput" required>
+                        <option value="movie" selected>Movie</option>
+                        <option value="series">Web Series / TV Show</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="frow">
+                <div class="ffield">
                     <label class="flbl" for="f-title"><i class="fa-solid fa-film"></i> Movie Title <span class="req">*</span></label>
                     <input type="text" id="f-title" class="finput" placeholder="e.g. Kanguva" required>
                     <span class="ferr" id="e-title">Movie title is required</span>
@@ -256,26 +266,42 @@
                 </div>
             </div>
 
-            <div class="sdiv"><span><i class="fa-solid fa-download" style="color:#00f0ff;margin-right:5px;"></i>Download Links</span></div>
+            <!-- Movie-only Downloads Section -->
+            <div id="movie-downloads-section">
+                <div class="sdiv"><span><i class="fa-solid fa-download" style="color:#00f0ff;margin-right:5px;"></i>Download Links</span></div>
+                <div class="lsec">
+                    <div class="lhdr">
+                        <span>One row per resolution &mdash; Magnet &amp; Direct links optional per row</span>
+                        <button type="button" class="btn-adrow" id="btn-addl"><i class="fa-solid fa-plus"></i> Add Row</button>
+                    </div>
+                    <div class="dlhdr">
+                        <span>Resolution</span><span>Codec</span><span>Audio</span><span>Size</span>
+                        <span>🟡 Magnet</span><span>🔵 Direct URL</span><span></span>
+                    </div>
+                    <div id="dlrows">
+                        <div class="dlrow">
+                            <div class="dlc"><input type="text" placeholder="1080p" class="rf"></div>
+                            <div class="dlc"><input type="text" placeholder="x264" class="cf"></div>
+                            <div class="dlc"><input type="text" placeholder="Tamil" class="af"></div>
+                            <div class="dlc"><input type="text" placeholder="1.4 GB" class="sf"></div>
+                            <div class="dlc"><input type="text" placeholder="magnet:?xt=..." class="lf"></div>
+                            <div class="dlc"><input type="text" placeholder="https://..." class="df"></div>
+                            <div class="dlc"><button type="button" class="bdel" onclick="this.closest('.dlrow').remove()"><i class="fa-solid fa-trash-can"></i></button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <div class="lsec">
-                <div class="lhdr">
-                    <span>One row per resolution &mdash; Magnet &amp; Direct links optional per row</span>
-                    <button type="button" class="btn-adrow" id="btn-addl"><i class="fa-solid fa-plus"></i> Add Row</button>
-                </div>
-                <div class="dlhdr">
-                    <span>Resolution</span><span>Codec</span><span>Audio</span><span>Size</span>
-                    <span>&#x1F7E1; Magnet</span><span>&#x1F535; Direct URL</span><span></span>
-                </div>
-                <div id="dlrows">
-                    <div class="dlrow">
-                        <div class="dlc"><input type="text" placeholder="1080p" class="rf"></div>
-                        <div class="dlc"><input type="text" placeholder="x264" class="cf"></div>
-                        <div class="dlc"><input type="text" placeholder="Tamil" class="af"></div>
-                        <div class="dlc"><input type="text" placeholder="1.4 GB" class="sf"></div>
-                        <div class="dlc"><input type="text" placeholder="magnet:?xt=..." class="lf"></div>
-                        <div class="dlc"><input type="text" placeholder="https://..." class="df"></div>
-                        <div class="dlc"><button type="button" class="bdel" onclick="this.closest('.dlrow').remove()"><i class="fa-solid fa-trash-can"></i></button></div>
+            <!-- Series-only Episodes Section -->
+            <div id="series-episodes-section" style="display: none; margin-bottom: 20px;">
+                <div class="sdiv"><span><i class="fa-solid fa-rectangle-list" style="color:#ffb300;margin-right:5px;"></i>Web Series Episodes</span></div>
+                <div class="lsec" style="border-color: rgba(255, 179, 0, 0.2); background: rgba(255, 179, 0, 0.01);">
+                    <div class="lhdr">
+                        <span style="color: #ffb300;">Manage episodes, seasons, titles, and download rows for each episode.</span>
+                        <button type="button" class="btn-adrow" id="btn-add-episode" style="background: rgba(255, 179, 0, 0.15); border: 1px solid #ffb300; color: #ffb300; display: flex; align-items: center; gap: 5px;"><i class="fa-solid fa-plus"></i> Add Episode</button>
+                    </div>
+                    <div id="episodes-list-container" style="display: flex; flex-direction: column; gap: 20px; margin-top: 15px;">
+                        <!-- Episode cards added here dynamically -->
                     </div>
                 </div>
             </div>
@@ -288,7 +314,7 @@
     </div>
 </div>
 
-<script src="github_sync.js?v=10"></script>
+<script src="github_sync.js?v=11"></script>
 <script>
 const safeStorage={_f:{},getItem(k){try{return localStorage.getItem(k);}catch(e){return this._f[k]||null;}},setItem(k,v){try{localStorage.setItem(k,v);}catch(e){this._f[k]=String(v);}}},safeSession={_f:{},getItem(k){try{return sessionStorage.getItem(k);}catch(e){return this._f[k]||null;}},setItem(k,v){try{sessionStorage.setItem(k,v);}catch(e){this._f[k]=String(v);}}};
 let currentUser=null;try{currentUser=JSON.parse(safeSession.getItem('current_user')||safeStorage.getItem('current_user'));}catch(e){}
@@ -343,6 +369,100 @@ document.getElementById('bchg').addEventListener('click',()=>{hideP();pfile.valu
 ['dragleave','drop'].forEach(ev=>pdrop.addEventListener(ev,e=>{e.preventDefault();pdrop.classList.remove('dragover');if(ev==='drop'&&e.dataTransfer.files[0]){const f=e.dataTransfer.files[0];if(!f.type.startsWith('image/')){showErr('Only image files can be dropped.');return;}const r=new FileReader();r.onload=re=>showP(re.target.result);r.readAsDataURL(f);}}));
 const vinp=document.getElementById('f-video'),vfn=document.getElementById('vfn');vinp.addEventListener('change',()=>{const f=vinp.files[0];vfn.textContent=f?(f.name.length>26?f.name.substring(0,24)+'...':f.name):'';});
 const dlrows=document.getElementById('dlrows');document.getElementById('btn-addl').addEventListener('click',()=>{const row=document.createElement('div');row.className='dlrow';row.innerHTML='<div class="dlc"><input type="text" placeholder="1080p" class="rf"></div><div class="dlc"><input type="text" placeholder="x264" class="cf"></div><div class="dlc"><input type="text" placeholder="Tamil" class="af"></div><div class="dlc"><input type="text" placeholder="1.4 GB" class="sf"></div><div class="dlc"><input type="text" placeholder="magnet:?xt=..." class="lf"></div><div class="dlc"><input type="text" placeholder="https://..." class="df"></div><div class="dlc"><button type="button" class="bdel" onclick="this.closest(&apos;.dlrow&apos;).remove()"><i class="fa-solid fa-trash-can"></i></button></div>';dlrows.appendChild(row);row.querySelector('input').focus();});
+
+// Category Switch & Episodes Manager logic
+const categorySelect = document.getElementById("f-category");
+const movieDownloadsSection = document.getElementById("movie-downloads-section");
+const seriesEpisodesSection = document.getElementById("series-episodes-section");
+const episodesListContainer = document.getElementById("episodes-list-container");
+const btnAddEpisode = document.getElementById("btn-add-episode");
+
+categorySelect.addEventListener("change", () => {
+    const isSeries = categorySelect.value === "series";
+    movieDownloadsSection.style.display = isSeries ? "none" : "block";
+    seriesEpisodesSection.style.display = isSeries ? "block" : "none";
+    if (isSeries && episodesListContainer.children.length === 0) {
+        addEpisodeRow({}); // Add one default episode
+    }
+});
+
+function addEpisodeRow(data = {}) {
+    const card = document.createElement("div");
+    card.className = "episode-card";
+    card.style.cssText = "border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; position: relative;";
+    
+    card.innerHTML = `
+        <button type="button" class="bdel btn-delete-episode" style="position: absolute; top: 15px; right: 15px; padding: 5px 10px; font-size: 0.75rem; border-color: rgba(255, 74, 96, 0.25); color: #ff6b6b;"><i class="fa-solid fa-trash-can"></i> Remove Episode</button>
+        <div class="frow" style="margin-bottom: 12px; display: flex; gap: 10px;">
+            <div class="ffield" style="flex: 1; margin-bottom: 0;">
+                <label class="flbl">Season Number</label>
+                <input type="number" class="finput ep-season-num" placeholder="1" min="1" value="${data.season || 1}">
+            </div>
+            <div class="ffield" style="flex: 1; margin-bottom: 0;">
+                <label class="flbl">Episode Number</label>
+                <input type="number" class="finput ep-episode-num" placeholder="e.g. 1" min="1" value="${data.episode || ''}">
+            </div>
+            <div class="ffield" style="flex: 2; margin-bottom: 0;">
+                <label class="flbl">Episode Title</label>
+                <input type="text" class="finput ep-title" placeholder="e.g. Episode 1: Pilot" value="${data.title || ''}">
+            </div>
+        </div>
+        
+        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.75rem; font-weight:700; color:var(--accent-cyan);"><i class="fa-solid fa-download"></i> Episode Download Links</span>
+                <button type="button" class="btn-add-ep-dl" style="font-size: 0.72rem; padding: 4px 10px; background: rgba(0,240,255,0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Link Row</button>
+            </div>
+            <div class="ep-dl-headers" style="display: grid; grid-template-columns: 80px 70px 80px 70px 1fr 1fr; gap: 5px; font-size: 0.65rem; color: #8892a4; margin-bottom: 5px; padding: 0 5px;">
+                <span>Resolution</span><span>Codec</span><span>Audio</span><span>Size</span><span>Magnet Link</span><span>Direct URL</span>
+            </div>
+            <div class="ep-dl-rows-container" style="display:flex; flex-direction:column; gap:5px;">
+                <!-- Nested download rows here -->
+            </div>
+        </div>
+    `;
+    
+    const container = card.querySelector(".ep-dl-rows-container");
+    const btnAddDl = card.querySelector(".btn-add-ep-dl");
+    
+    btnAddDl.addEventListener("click", () => {
+        addEpisodeDlRow(container, {});
+    });
+    
+    card.querySelector(".btn-delete-episode").addEventListener("click", () => {
+        card.remove();
+    });
+    
+    // Populate existing downloads if provided
+    if (data.downloads && data.downloads.length > 0) {
+        data.downloads.forEach(dl => addEpisodeDlRow(container, dl));
+    } else {
+        addEpisodeDlRow(container, {}); // Add one default row
+    }
+    
+    episodesListContainer.appendChild(card);
+}
+
+function addEpisodeDlRow(container, dlData = {}) {
+    const row = document.createElement("div");
+    row.className = "ep-dl-row";
+    row.style.cssText = "display:grid; grid-template-columns: 80px 70px 80px 70px 1fr 1fr 32px; gap: 5px; align-items: center;";
+    row.innerHTML = `
+        <input type="text" class="finput ep-dl-res" placeholder="1080p" value="${dlData.resolution || ''}" style="padding:5px; font-size:0.75rem; height:auto; margin-bottom: 0;">
+        <input type="text" class="finput ep-dl-codec" placeholder="x264" value="${dlData.codec || ''}" style="padding:5px; font-size:0.75rem; height:auto; margin-bottom: 0;">
+        <input type="text" class="finput ep-dl-audio" placeholder="Tamil" value="${dlData.audio || ''}" style="padding:5px; font-size:0.75rem; height:auto; margin-bottom: 0;">
+        <input type="text" class="finput ep-dl-size" placeholder="1.4 GB" value="${dlData.size || ''}" style="padding:5px; font-size:0.75rem; height:auto; margin-bottom: 0;">
+        <input type="text" class="finput ep-dl-link" placeholder="magnet:?xt=..." value="${dlData.link || ''}" style="padding:5px; font-size:0.75rem; height:auto; margin-bottom: 0;">
+        <input type="text" class="finput ep-dl-direct" placeholder="https://..." value="${dlData.directLink || ''}" style="padding:5px; font-size:0.75rem; height:auto; margin-bottom: 0;">
+        <button type="button" class="bdel" onclick="this.closest('.ep-dl-row').remove()" style="padding: 5px; height: auto; margin-bottom: 0;"><i class="fa-solid fa-trash-can"></i></button>
+    `;
+    container.appendChild(row);
+}
+
+btnAddEpisode.addEventListener("click", () => {
+    addEpisodeRow({});
+});
+
 document.getElementById('bsub').addEventListener('click',function(e){const rp=document.createElement('span');rp.className='rpl';const rc=this.getBoundingClientRect(),sz=Math.max(rc.width,rc.height);rp.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-rc.left-sz/2}px;top:${e.clientY-rc.top-sz/2}px;`;this.appendChild(rp);setTimeout(()=>rp.remove(),700);});
 [['f-title','e-title'],['f-year','e-year'],['f-genre','e-genre'],['f-lang','e-lang'],['f-quality','e-quality'],['f-desc','e-desc']].forEach(([id,eid])=>document.getElementById(id).addEventListener('input',()=>{if(document.getElementById(id).value.trim()){document.getElementById(id).classList.remove('inv');document.getElementById(eid).style.display='none';}}));
 function showErr(msg){document.getElementById('err-msg').textContent=msg;document.getElementById('al-err').classList.add('show');document.getElementById('al-ok').classList.remove('show');document.getElementById('al-err').scrollIntoView({behavior:'smooth',block:'center'});}
@@ -368,7 +488,43 @@ if(!quality){document.getElementById('f-quality').classList.add('inv');document.
 if(!desc){document.getElementById('f-desc').classList.add('inv');document.getElementById('e-desc').style.display='block';ok=false;}
 if(!poster){document.getElementById('e-poster').style.display='block';ok=false;}else{document.getElementById('e-poster').style.display='none';}
 if(!ok){showErr('Please fill in all required fields before uploading.');return;}
-const dls=[]; dlrows.querySelectorAll('.dlrow').forEach(r=>{const res=(r.querySelector('.rf')?.value||'').trim(),codec=(r.querySelector('.cf')?.value||'').trim(),audio=(r.querySelector('.af')?.value||'').trim(),size=(r.querySelector('.sf')?.value||'').trim(),link=(r.querySelector('.lf')?.value||'').trim(),direct=(r.querySelector('.df')?.value||'').trim();if(res&&(link||direct))dls.push({resolution:res,codec,audio,size,link,directLink:direct});});
+const category=document.getElementById('f-category').value;
+const dls=[]; 
+if(category === 'movie') {
+    dlrows.querySelectorAll('.dlrow').forEach(r=>{const res=(r.querySelector('.rf')?.value||'').trim(),codec=(r.querySelector('.cf')?.value||'').trim(),audio=(r.querySelector('.af')?.value||'').trim(),size=(r.querySelector('.sf')?.value||'').trim(),link=(r.querySelector('.lf')?.value||'').trim(),direct=(r.querySelector('.df')?.value||'').trim();if(res&&(link||direct))dls.push({resolution:res,codec,audio,size,link,directLink:direct});});
+}
+
+const episodes=[];
+if(category === 'series') {
+    const epCards = episodesListContainer.querySelectorAll('.episode-card');
+    epCards.forEach(card => {
+        const season = parseInt(card.querySelector('.ep-season-num').value) || 1;
+        const episode = parseInt(card.querySelector('.ep-episode-num').value) || 0;
+        const epTitle = card.querySelector('.ep-title').value.trim();
+        
+        const epDls = [];
+        card.querySelectorAll('.ep-dl-row').forEach(row => {
+            const res = row.querySelector('.ep-dl-res').value.trim();
+            const codec = row.querySelector('.ep-dl-codec').value.trim();
+            const audio = row.querySelector('.ep-dl-audio').value.trim();
+            const size = row.querySelector('.ep-dl-size').value.trim();
+            const link = row.querySelector('.ep-dl-link').value.trim();
+            const direct = row.querySelector('.ep-dl-direct').value.trim();
+            if (res && (link || direct)) {
+                epDls.push({ resolution: res, codec, audio, size, link, directLink: direct });
+            }
+        });
+        
+        if (episode) {
+            episodes.push({ season, episode, title: epTitle, downloads: epDls });
+        }
+    });
+    if (episodes.length === 0) {
+        showErr('Please add at least one episode with download links for the Web Series.');
+        return;
+    }
+}
+
 let movies=[];try{movies=JSON.parse(safeStorage.getItem('movies_db')||'[]');}catch(e){}
 if (movies.length === 16 && movies.some(m => m.id === 1)) {
     movies = [];
@@ -376,8 +532,65 @@ if (movies.length === 16 && movies.some(m => m.id === 1)) {
 }
 if(movies.some(m=>m.title.toLowerCase()===title.toLowerCase()&&m.year===year)){showErr(`"${title} (${year})" already exists in the catalog.`);return;}
 const btn=document.getElementById('bsub');btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
-runProg(async ()=>{const nm={id:Date.now(),title,year,genre,type,quality,languages:lang.split(',').map(l=>l.trim()),rating,director,cast,duration,poster,banner:banner||poster,trailer,description:desc,downloads:dls,uploadedBy:currentUser?.username||'admin',timestamp:new Date().toISOString()};movies.push(nm);safeStorage.setItem('movies_db',JSON.stringify(movies));safeStorage.setItem('gh_just_uploaded',Date.now().toString());let pushSuccess=true;if(typeof GitHubSync!=='undefined'&&GitHubSync.hasToken){document.getElementById('plbl').textContent='Syncing with cloud storage...';try{await GitHubSync.saveMovies(movies);}catch(e){console.warn('[GitHubSync] Upload push failed:',e.message);pushSuccess=false;}}document.getElementById('pwrap').style.display='none';document.getElementById('plbl').style.display='none';if(pushSuccess){document.getElementById('ok-msg').textContent=`"${title} (${year})" published and synced to cloud! Redirecting...`;}else{document.getElementById('ok-msg').textContent=`"${title} (${year})" saved locally (cloud sync failed). Redirecting...`;}document.getElementById('al-ok').classList.add('show');document.getElementById('al-ok').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{window.location.href='index.html';},2500);});});
-document.getElementById('brst').addEventListener('click',()=>{document.getElementById('upload-form').reset();hideP();vfn.textContent='';document.getElementById('pwrap').style.display='none';document.getElementById('plbl').style.display='none';hideAlerts();document.querySelectorAll('.finput').forEach(el=>el.classList.remove('inv'));document.querySelectorAll('.ferr').forEach(el=>el.style.display='none');dlrows.innerHTML='<div class="dlrow"><div class="dlc"><input type="text" placeholder="1080p" class="rf"></div><div class="dlc"><input type="text" placeholder="x264" class="cf"></div><div class="dlc"><input type="text" placeholder="Tamil" class="af"></div><div class="dlc"><input type="text" placeholder="1.4 GB" class="sf"></div><div class="dlc"><input type="text" placeholder="magnet:?xt=..." class="lf"></div><div class="dlc"><input type="text" placeholder="https://..." class="df"></div><div class="dlc"><button type="button" class="bdel" onclick="this.closest(&apos;.dlrow&apos;).remove()"><i class="fa-solid fa-trash-can"></i></button></div></div>';const btn=document.getElementById('bsub');btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-cloud-arrow-up"></i> Upload Movie';});
+runProg(async ()=>{
+    const nm={
+        id:Date.now(),
+        title,
+        year,
+        genre,
+        type,
+        quality,
+        languages:lang.split(',').map(l=>l.trim()),
+        rating,
+        director,
+        cast,
+        duration,
+        poster,
+        banner:banner||poster,
+        trailer,
+        description:desc,
+        downloads:category==='series'?[]:dls,
+        category,
+        episodes:category==='series'?episodes:[],
+        uploadedBy:currentUser?.username||'admin',
+        timestamp:new Date().toISOString()
+    };
+    movies.push(nm);
+    safeStorage.setItem('movies_db',JSON.stringify(movies));
+    safeStorage.setItem('gh_just_uploaded',Date.now().toString());
+    let pushSuccess=true;
+    if(typeof GitHubSync!=='undefined'&&GitHubSync.hasToken){
+        document.getElementById('plbl').textContent='Syncing with cloud storage...';
+        try{await GitHubSync.saveMovies(movies);}
+        catch(e){console.warn('[GitHubSync] Upload push failed:',e.message);pushSuccess=false;}
+    }
+    document.getElementById('pwrap').style.display='none';
+    document.getElementById('plbl').style.display='none';
+    if(pushSuccess){document.getElementById('ok-msg').textContent=`"${title} (${year})" published and synced to cloud! Redirecting...`;}
+    else{document.getElementById('ok-msg').textContent=`"${title} (${year})" saved locally (cloud sync failed). Redirecting...`;}
+    document.getElementById('al-ok').classList.add('show');
+    document.getElementById('al-ok').scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{window.location.href='index.html';},2500);
+});});
+
+document.getElementById('brst').addEventListener('click',()=>{
+    document.getElementById('upload-form').reset();
+    hideP();
+    vfn.textContent='';
+    episodesListContainer.innerHTML='';
+    categorySelect.value='movie';
+    movieDownloadsSection.style.display='block';
+    seriesEpisodesSection.style.display='none';
+    document.getElementById('pwrap').style.display='none';
+    document.getElementById('plbl').style.display='none';
+    hideAlerts();
+    document.querySelectorAll('.finput').forEach(el=>el.classList.remove('inv'));
+    document.querySelectorAll('.ferr').forEach(el=>el.style.display='none');
+    dlrows.innerHTML='<div class="dlrow"><div class="dlc"><input type="text" placeholder="1080p" class="rf"></div><div class="dlc"><input type="text" placeholder="x264" class="cf"></div><div class="dlc"><input type="text" placeholder="Tamil" class="af"></div><div class="dlc"><input type="text" placeholder="1.4 GB" class="sf"></div><div class="dlc"><input type="text" placeholder="magnet:?xt=..." class="lf"></div><div class="dlc"><input type="text" placeholder="https://..." class="df"></div><div class="dlc"><button type="button" class="bdel" onclick="this.closest(&apos;.dlrow&apos;).remove()"><i class="fa-solid fa-trash-can"></i></button></div></div>';
+    const btn=document.getElementById('bsub');
+    btn.disabled=false;
+    btn.innerHTML='<i class="fa-solid fa-cloud-arrow-up"></i> Upload Movie';
+});
 </script>
 </body>
 </html>

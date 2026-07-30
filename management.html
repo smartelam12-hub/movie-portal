@@ -385,6 +385,15 @@
             <div class="em-body">
                 <input type="hidden" id="em-id">
                 <div class="em-row">
+                    <div class="em-field" style="width: 100%;">
+                        <label class="em-lbl">Release Category</label>
+                        <select class="em-inp" id="em-category">
+                            <option value="movie">Movie</option>
+                            <option value="series">Web Series / TV Show</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="em-row">
                     <div class="em-field">
                         <label class="em-lbl">Movie Title</label>
                         <input type="text" class="em-inp" id="em-title">
@@ -458,8 +467,8 @@
                     <textarea class="em-inp" id="em-description"></textarea>
                 </div>
 
-                <!-- Download Links Section -->
-                <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 14px;">
+                <!-- Movie Download Links Section -->
+                <div id="em-movie-downloads-section" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 14px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                         <label class="em-lbl" style="margin-bottom: 0;"><i class="fa-solid fa-link" style="color: var(--accent-cyan); margin-right: 5px;"></i> Download Links</label>
                         <button type="button" id="em-add-link" style="font-size: 0.72rem; padding: 4px 10px; background: rgba(0,240,255,0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 6px; cursor: pointer; font-family: inherit;"><i class="fa-solid fa-plus"></i> Add Row</button>
@@ -468,6 +477,17 @@
                         <!-- Link rows rendered dynamically -->
                     </div>
                     <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 6px;">Each row: Resolution, Codec, Audio, Size, Magnet Link, Direct Link</div>
+                </div>
+
+                <!-- Series Episodes Section -->
+                <div id="em-series-episodes-section" style="display: none; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 14px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <label class="em-lbl" style="margin-bottom: 0; color: #ffb300;"><i class="fa-solid fa-rectangle-list" style="margin-right: 5px;"></i> Web Series Episodes</label>
+                        <button type="button" id="em-add-episode" style="font-size: 0.72rem; padding: 4px 10px; background: rgba(255, 179, 0, 0.15); border: 1px solid #ffb300; color: #ffb300; border-radius: 6px; cursor: pointer; font-family: inherit;"><i class="fa-solid fa-plus"></i> Add Episode</button>
+                    </div>
+                    <div id="em-episodes-container" style="display: flex; flex-direction: column; gap: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                        <!-- Episode list edited dynamically -->
+                    </div>
                 </div>
             </div>
             <div class="em-foot">
@@ -478,7 +498,7 @@
     </div>
 
     <!-- Management Dashboard Logic -->
-    <script src="github_sync.js?v=10"></script>
+    <script src="github_sync.js?v=11"></script>
     <script>
         function showNotification(title, message, isSuccess = true) {
             const oldToast = document.querySelector(".custom-toast");
@@ -590,13 +610,20 @@
 
             movies.forEach(movie => {
                 const tr = document.createElement("tr");
+                const catBadge = movie.category === 'series' 
+                    ? `<span style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #ffb300; background: rgba(255, 179, 0, 0.12); border: 1px solid rgba(255, 179, 0, 0.25); padding: 1px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px;"><i class="fa-solid fa-rectangle-list"></i> Series (${movie.episodes ? movie.episodes.length : 0} Ep)</span>`
+                    : `<span style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: var(--accent-cyan); background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.2); padding: 1px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px;"><i class="fa-solid fa-film"></i> Movie</span>`;
+
                 tr.innerHTML = `
                     <td>
                         <div class="movie-thumb-cell">
                             <img src="${movie.poster}" alt="Poster" class="movie-thumb-img">
                             <div>
-                                <div class="movie-title-cell">${movie.title}</div>
-                                <div class="movie-year-cell">${movie.year}</div>
+                                <div class="movie-title-cell" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                                    <span>${movie.title}</span>
+                                    ${catBadge}
+                                </div>
+                                <div class="movie-year-cell" style="margin-top: 2px;">${movie.year}</div>
                             </div>
                         </div>
                     </td>
@@ -666,14 +693,37 @@
             document.getElementById("em-trailer").value = movie.trailer || "";
             document.getElementById("em-description").value = movie.description || "";
 
-            // Render existing download links
-            const linksContainer = document.getElementById("em-links-container");
-            linksContainer.innerHTML = "";
-            const downloads = movie.downloads || [];
-            if (downloads.length === 0) {
-                addLinkRow(linksContainer, {});
+            const category = movie.category || "movie";
+            document.getElementById("em-category").value = category;
+            
+            const movieDownloadsSection = document.getElementById("em-movie-downloads-section");
+            const seriesEpisodesSection = document.getElementById("em-series-episodes-section");
+            const episodesContainer = document.getElementById("em-episodes-container");
+
+            if (category === "series") {
+                movieDownloadsSection.style.display = "none";
+                seriesEpisodesSection.style.display = "block";
+                
+                episodesContainer.innerHTML = "";
+                const episodes = movie.episodes || [];
+                if (episodes.length === 0) {
+                    addEmEpisodeRow(episodesContainer, {});
+                } else {
+                    episodes.forEach(ep => addEmEpisodeRow(episodesContainer, ep));
+                }
             } else {
-                downloads.forEach(dl => addLinkRow(linksContainer, dl));
+                movieDownloadsSection.style.display = "block";
+                seriesEpisodesSection.style.display = "none";
+                
+                // Render existing download links
+                const linksContainer = document.getElementById("em-links-container");
+                linksContainer.innerHTML = "";
+                const downloads = movie.downloads || [];
+                if (downloads.length === 0) {
+                    addLinkRow(linksContainer, {});
+                } else {
+                    downloads.forEach(dl => addLinkRow(linksContainer, dl));
+                }
             }
 
             editOverlay.classList.add("open");
@@ -697,6 +747,92 @@
 
         document.getElementById("em-add-link").addEventListener("click", () => {
             addLinkRow(document.getElementById("em-links-container"), {});
+        });
+
+        // Category Switch & Episodes Edit Logic
+        const emCategory = document.getElementById("em-category");
+        const emMovieDownloadsSection = document.getElementById("em-movie-downloads-section");
+        const emSeriesEpisodesSection = document.getElementById("em-series-episodes-section");
+        const emEpisodesContainer = document.getElementById("em-episodes-container");
+
+        emCategory.addEventListener("change", () => {
+            const isSeries = emCategory.value === "series";
+            emMovieDownloadsSection.style.display = isSeries ? "none" : "block";
+            emSeriesEpisodesSection.style.display = isSeries ? "block" : "none";
+            if (isSeries && emEpisodesContainer.children.length === 0) {
+                addEmEpisodeRow(emEpisodesContainer, {});
+            }
+        });
+
+        function addEmEpisodeRow(container, data = {}) {
+            const card = document.createElement("div");
+            card.className = "em-episode-card";
+            card.style.cssText = "border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; position: relative; margin-bottom: 10px;";
+            
+            card.innerHTML = `
+                <button type="button" class="btn-delete-em-ep" style="position: absolute; top: 12px; right: 12px; padding: 3px 8px; font-size: 0.7rem; background: rgba(255,74,96,0.12); border: 1px solid rgba(255,74,96,0.3); color: #ff4a60; border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-trash-can"></i> Remove</button>
+                <div class="em-row" style="margin-bottom: 8px; display: flex; gap: 8px;">
+                    <div class="em-field" style="flex: 1; margin-bottom: 0;">
+                        <label class="em-lbl" style="font-size: 0.7rem;">Season</label>
+                        <input type="number" class="em-inp em-ep-season" value="${data.season || 1}" style="padding: 4px; font-size: 0.75rem;">
+                    </div>
+                    <div class="em-field" style="flex: 1; margin-bottom: 0;">
+                        <label class="em-lbl" style="font-size: 0.7rem;">Episode</label>
+                        <input type="number" class="em-inp em-ep-number" value="${data.episode || ''}" style="padding: 4px; font-size: 0.75rem;">
+                    </div>
+                    <div class="em-field" style="flex: 2; margin-bottom: 0;">
+                        <label class="em-lbl" style="font-size: 0.7rem;">Title</label>
+                        <input type="text" class="em-inp em-ep-title" value="${data.title || ''}" style="padding: 4px; font-size: 0.75rem;">
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span style="font-size:0.68rem; font-weight:700; color:var(--accent-cyan);"><i class="fa-solid fa-download"></i> Episode Links</span>
+                        <button type="button" class="btn-add-em-ep-dl" style="font-size: 0.65rem; padding: 2px 6px; background: rgba(0,240,255,0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Link</button>
+                    </div>
+                    <div class="em-ep-dl-container" style="display:flex; flex-direction:column; gap:4px;">
+                        <!-- Nested download rows -->
+                    </div>
+                </div>
+            `;
+            
+            const dlContainer = card.querySelector(".em-ep-dl-container");
+            card.querySelector(".btn-add-em-ep-dl").addEventListener("click", () => {
+                addEmEpisodeDlRow(dlContainer, {});
+            });
+            
+            card.querySelector(".btn-delete-em-ep").addEventListener("click", () => {
+                card.remove();
+            });
+            
+            if (data.downloads && data.downloads.length > 0) {
+                data.downloads.forEach(dl => addEmEpisodeDlRow(dlContainer, dl));
+            } else {
+                addEmEpisodeDlRow(dlContainer, {});
+            }
+            
+            container.appendChild(card);
+        }
+
+        function addEmEpisodeDlRow(container, dl = {}) {
+            const row = document.createElement("div");
+            row.className = "em-ep-dl-row";
+            row.style.cssText = "display:grid; grid-template-columns: 80px 70px 80px 70px 1fr 1fr 28px; gap: 4px; align-items: center;";
+            row.innerHTML = `
+                <input type="text" class="em-inp em-ep-dl-res" placeholder="1080p" value="${dl.resolution || ''}" style="padding:4px; font-size:0.7rem; height:auto; margin-bottom: 0;">
+                <input type="text" class="em-inp em-ep-dl-codec" placeholder="x264" value="${dl.codec || ''}" style="padding:4px; font-size:0.7rem; height:auto; margin-bottom: 0;">
+                <input type="text" class="em-inp em-ep-dl-audio" placeholder="Tamil" value="${dl.audio || ''}" style="padding:4px; font-size:0.7rem; height:auto; margin-bottom: 0;">
+                <input type="text" class="em-inp em-ep-dl-size" placeholder="1.4 GB" value="${dl.size || ''}" style="padding:4px; font-size:0.7rem; height:auto; margin-bottom: 0;">
+                <input type="text" class="em-inp em-ep-dl-link" placeholder="magnet:?xt=..." value="${dl.link || ''}" style="padding:4px; font-size:0.7rem; height:auto; margin-bottom: 0;">
+                <input type="text" class="em-inp em-ep-dl-direct" placeholder="https://..." value="${dl.directLink || ''}" style="padding:4px; font-size:0.7rem; height:auto; margin-bottom: 0;">
+                <button type="button" onclick="this.closest('.em-ep-dl-row').remove()" style="padding: 4px; height: auto; margin-bottom: 0; background:rgba(255,74,96,0.12); border:1px solid rgba(255,74,96,0.3); color:#ff4a60; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        document.getElementById("em-add-episode").addEventListener("click", () => {
+            addEmEpisodeRow(emEpisodesContainer, {});
         });
 
         function closeEditModal() {
@@ -743,19 +879,51 @@
             movies[idx].trailer = document.getElementById("em-trailer").value.trim();
             movies[idx].description = document.getElementById("em-description").value.trim();
 
-            // Save download links from edit rows
-            const dlRows = document.querySelectorAll(".dl-edit-row");
-            const newDls = [];
-            dlRows.forEach(row => {
-                const res    = row.querySelector(".em-dl-res").value.trim();
-                const codec  = row.querySelector(".em-dl-codec").value.trim();
-                const audio  = row.querySelector(".em-dl-audio").value.trim();
-                const size   = row.querySelector(".em-dl-size").value.trim();
-                const link   = row.querySelector(".em-dl-link").value.trim();
-                const direct = row.querySelector(".em-dl-direct").value.trim();
-                if (res || link || direct) newDls.push({ resolution: res, codec, audio, size, link, directLink: direct });
-            });
-            movies[idx].downloads = newDls;
+            const category = document.getElementById("em-category").value;
+            movies[idx].category = category;
+
+            if (category === "series") {
+                const newEpisodes = [];
+                const epCards = document.querySelectorAll(".em-episode-card");
+                epCards.forEach(card => {
+                    const season = parseInt(card.querySelector('.em-ep-season').value) || 1;
+                    const episode = parseInt(card.querySelector('.em-ep-number').value) || 0;
+                    const title = card.querySelector('.em-ep-title').value.trim();
+                    
+                    const epDls = [];
+                    card.querySelectorAll('.em-ep-dl-row').forEach(row => {
+                        const res = row.querySelector('.em-ep-dl-res').value.trim();
+                        const codec = row.querySelector('.em-ep-dl-codec').value.trim();
+                        const audio = row.querySelector('.em-ep-dl-audio').value.trim();
+                        const size = row.querySelector('.em-ep-dl-size').value.trim();
+                        const link = row.querySelector('.em-ep-dl-link').value.trim();
+                        const direct = row.querySelector('.em-ep-dl-direct').value.trim();
+                        if (res && (link || direct)) {
+                            epDls.push({ resolution: res, codec, audio, size, link, directLink: direct });
+                        }
+                    });
+                    if (episode) {
+                        newEpisodes.push({ season, episode, title, downloads: epDls });
+                    }
+                });
+                movies[idx].episodes = newEpisodes;
+                movies[idx].downloads = [];
+            } else {
+                // Save download links from edit rows
+                const dlRows = document.querySelectorAll(".dl-edit-row");
+                const newDls = [];
+                dlRows.forEach(row => {
+                    const res    = row.querySelector(".em-dl-res").value.trim();
+                    const codec  = row.querySelector(".em-dl-codec").value.trim();
+                    const audio  = row.querySelector(".em-dl-audio").value.trim();
+                    const size   = row.querySelector(".em-dl-size").value.trim();
+                    const link   = row.querySelector(".em-dl-link").value.trim();
+                    const direct = row.querySelector(".em-dl-direct").value.trim();
+                    if (res && (link || direct)) newDls.push({ resolution: res, codec, audio, size, link, directLink: direct });
+                });
+                movies[idx].downloads = newDls;
+                movies[idx].episodes = [];
+            }
 
             safeStorage.setItem("movies_db", JSON.stringify(movies));
             safeStorage.setItem("gh_just_uploaded", Date.now().toString());

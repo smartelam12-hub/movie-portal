@@ -249,11 +249,23 @@
                     <!-- Modal Tabs -->
                     <div class="modal-tabs">
                         <button class="modal-tab active" data-tab="downloads"><i class="fa-solid fa-download"></i> Downloads</button>
-                        <button class="modal-tab" data-tab="watch-online"><i class="fa-solid fa-circle-play"></i> Watch Trailer</button>
+<button class="modal-tab" data-tab="watch-online"><i class="fa-solid fa-circle-play"></i> Watch Trailer</button>
                     </div>
 
                     <!-- Downloads Section -->
                     <div class="tab-content active" id="tab-downloads">
+                        <!-- Web Series Episodes Selector -->
+                        <div id="modal-series-selector" style="display: none; margin-bottom: 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: #ffb300; text-transform: uppercase; letter-spacing: 0.5px;">Season:</label>
+                                <select id="modal-season-select" style="background: #0b0f19; border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-family: inherit; cursor: pointer; outline: none;"></select>
+                            </div>
+                            <div style="font-size: 0.78rem; font-weight: 700; color: #8892a4; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Episodes:</div>
+                            <div id="modal-episodes-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; padding-right: 5px;">
+                                <!-- Dynamic episode list items -->
+                            </div>
+                        </div>
+
                         <div class="table-container">
                             <table class="downloads-table">
                                 <thead>
@@ -302,8 +314,8 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/webtorrent@1/webtorrent.min.js"></script>
-    <script src="github_sync.js?v=10"></script>
-    <script src="movies.js?v=10"></script>
-    <script src="app.js?v=10"></script>
+    <script src="github_sync.js?v=11"></script>
+    <script src="movies.js?v=11"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>
