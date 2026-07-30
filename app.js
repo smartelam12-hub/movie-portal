@@ -369,68 +369,51 @@ document.addEventListener("DOMContentLoaded", () => {
         let isYouTube = "false";
         let youtubeId = "";
 
-        // 1. Prioritize Trailer stream (as requested)
-        if (movie.trailer && movie.trailer.trim()) {
-            const t = movie.trailer.trim();
-            const ytId = getYouTubeId(t);
-            if (ytId) {
-                isYouTube = "true";
-                youtubeId = ytId;
-                streamSrc = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
-                streamLabel = "Official Trailer (YouTube)";
-            } else if (t.includes("http") || t.includes(".mp4") || t.includes(".webm") || t.includes(".mkv")) {
-                streamSrc = t;
-                streamLabel = "Official Trailer";
-            }
-        }
-
-        // 2. Fall back to streamable direct link if no trailer
-        if (!streamSrc && movie.downloads && movie.downloads.length > 0) {
-            const resOrder = ["2160p", "4k", "1080p", "720p", "480p", "360p"];
-            let best = null;
-            let bestScore = 999;
-            movie.downloads.forEach(dl => {
-                if (dl.directLink && dl.directLink.trim() && dl.directLink.trim().startsWith("http")) {
-                    const res = (dl.resolution || "").toLowerCase();
-                    let score = resOrder.findIndex(r => res.includes(r));
-                    if (score === -1) score = 50;
-                    if (!best || score < bestScore) {
-                        best = dl;
-                        bestScore = score;
-                    }
-                }
-            });
-            if (best) {
-                streamSrc = best.directLink.trim();
-                streamLabel = `Direct Movie Stream (${best.resolution || "HD"})`;
-            }
-        }
-
-        // 3. Fall back to magnet torrent stream if no direct link
-        if (!streamSrc && movie.downloads && movie.downloads.length > 0) {
-            const magnetRow = movie.downloads.find(dl => dl.link && dl.link.trim().startsWith("magnet:"));
-            if (magnetRow) {
-                streamSrc = magnetRow.link.trim();
-                streamLabel = `Torrent Movie Stream (${magnetRow.resolution || "HD"})`;
-                isMagnet = "true";
-            }
-        }
-
-        // Set player overlay state
-        playerStartOverlay.dataset.isMagnet = isMagnet;
-        playerStartOverlay.dataset.isYouTube = isYouTube;
-        playerStartOverlay.dataset.youtubeId = youtubeId;
-        playerStartOverlay.dataset.streamSrc = streamSrc;
-
-        if (streamSrc) {
-            playerStartOverlay.dataset.canPlay = "true";
-            playerStartOverlay.innerHTML = `
-                <i class="fa-solid fa-circle-play" style="font-size: 3rem; color: var(--accent-cyan);"></i>
-                <span style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 10px;">Play Trailer</span>
         const isSeries = movie.category === "series";
 
-        // Set player overlay state (for movies, standard logic)
+        // For Movies: resolve trailer / direct / magnet stream
         if (!isSeries) {
+            // 1. Prioritize Trailer
+            if (movie.trailer && movie.trailer.trim()) {
+                const t = movie.trailer.trim();
+                const ytId = getYouTubeId(t);
+                if (ytId) {
+                    isYouTube = "true";
+                    youtubeId = ytId;
+                    streamSrc = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+                    streamLabel = "Official Trailer (YouTube)";
+                } else if (t.includes("http") || t.includes(".mp4") || t.includes(".webm") || t.includes(".mkv")) {
+                    streamSrc = t;
+                    streamLabel = "Official Trailer";
+                }
+            }
+            // 2. Fall back to direct link
+            if (!streamSrc && movie.downloads && movie.downloads.length > 0) {
+                const resOrder = ["2160p", "4k", "1080p", "720p", "480p", "360p"];
+                let best = null, bestScore = 999;
+                movie.downloads.forEach(dl => {
+                    if (dl.directLink && dl.directLink.trim() && dl.directLink.trim().startsWith("http")) {
+                        const res = (dl.resolution || "").toLowerCase();
+                        let score = resOrder.findIndex(r => res.includes(r));
+                        if (score === -1) score = 50;
+                        if (!best || score < bestScore) { best = dl; bestScore = score; }
+                    }
+                });
+                if (best) {
+                    streamSrc = best.directLink.trim();
+                    streamLabel = `Direct Movie Stream (${best.resolution || "HD"})`;
+                }
+            }
+            // 3. Fall back to magnet
+            if (!streamSrc && movie.downloads && movie.downloads.length > 0) {
+                const magnetRow = movie.downloads.find(dl => dl.link && dl.link.trim().startsWith("magnet:"));
+                if (magnetRow) {
+                    streamSrc = magnetRow.link.trim();
+                    streamLabel = `Torrent Movie Stream (${magnetRow.resolution || "HD"})`;
+                    isMagnet = "true";
+                }
+            }
+
             playerStartOverlay.dataset.isMagnet = isMagnet;
             playerStartOverlay.dataset.isYouTube = isYouTube;
             playerStartOverlay.dataset.youtubeId = youtubeId;
@@ -457,7 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <small style="font-size:0.7rem;color:rgba(255,255,255,.4);margin-top:4px;">Provide a Trailer Link or Download Link to play</small>
                 `;
             }
-        }
+        } 
 
         // Backdrop & Poster
         document.getElementById("modal-bg-blur").style.backgroundImage = `url('${movie.backdrop}')`;
